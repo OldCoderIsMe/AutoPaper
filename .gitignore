@@ -1,0 +1,67 @@
+# AutoPaper - Git Ignore File
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+ENV/
+env/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# AutoPaper specific
+data/
+cache/
+articles/
+issues/*.pdf
+issues/*.md
+issues/*.png
+issues/*.jpg
+issues/*.svg
+issues/*_images/
+
+# Environment variables
+.env
+.env.local
+
+# Logs
+*.log
+
+# Database
+*.sqlite
+*.sqlite3
+db.sqlite
+
+# Generated covers
+generate_*_cover.py
+backfill_images.py
+update_to_remote_urls.py

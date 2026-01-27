@@ -1,0 +1,46 @@
+# Database
+database_path: data/db.sqlite
+
+# Obsidian Configuration
+obsidian:
+  vault_path: ~/Documents/ObsidianVault
+  auto_paper_folder: AutoPaper
+
+# Article Storage
+articles:
+  raw_dir: articles/raw
+  parsed_dir: articles/parsed
+  enriched_dir: articles/enriched
+
+# Issues Storage
+issues_dir: issues
+
+# API Configuration
+api:
+  anthropic_api_key: ${ANTHROPIC_API_KEY}
+  model: claude-sonnet-4-20250514
+  max_tokens: 4096
+
+# Tag Normalization Rules
+tag_normalization:
+  llm: [llm, large language model, 大模型, gpt, chatgpt]
+  kubernetes: [kubernetes, k8s, k8s]
+  ai: [ai, artificial intelligence, 人工智能]
+  machine_learning: [machine learning, ml, 机器学习]
+  deep_learning: [deep learning, dl, 深度学习]
+  cloud_native: [cloud native, 云原生]
+  microservices: [microservice, microservices, 微服务]
+  devops: [devops, 运维]
+  security: [security, 安全]
+  database: [database, db, 数据库]
+  frontend: [frontend, front-end, 前端]
+  backend: [backend, back-end, 后端]
+
+# PDF Export Settings
+pdf:
+  page_size: A4
+  margin_top: 20mm
+  margin_bottom: 20mm
+  margin_left: 15mm
+  margin_right: 15mm
+  font: "Source Han Sans CN"
