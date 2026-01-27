@@ -1,0 +1,60 @@
+{
+  "marketplace": {
+    "name": "autopaper-skills",
+    "displayName": "AutoPaper Skills",
+    "description": "AI-powered automated newspaper generation tool for Claude Code",
+    "version": "0.1.0",
+    "author": "OldCoderIsMe",
+    "repository": "OldCoderIsMe/AutoPaper",
+    "icon": "📰",
+    "category": "content-creation"
+  },
+  "skills": [
+    {
+      "name": "autopaper-add",
+      "displayName": "AutoPaper Add Article",
+      "description": "Add article from URL to AutoPaper database with AI-powered metadata extraction",
+      "icon": "➕",
+      "category": "content-curation",
+      "entry": "agents/autopaper/autopaper-add.md",
+      "environment": {
+        "ANTHROPIC_API_KEY": {
+          "description": "Anthropic API key for AI features",
+          "required": true,
+          "secret": true
+        }
+      }
+    },
+    {
+      "name": "autopaper-generate",
+      "displayName": "AutoPaper Generate Issue",
+      "description": "Generate weekly newspaper issue from collected articles with AI-composed editorial content",
+      "icon": "📰",
+      "category": "content-creation",
+      "entry": "agents/autopaper/autopaper-generate.md",
+      "environment": {
+        "ANTHROPIC_API_KEY": {
+          "description": "Anthropic API key for AI features",
+          "required": true,
+          "secret": true
+        }
+      }
+    },
+    {
+      "name": "autopaper-export-pdf",
+      "displayName": "AutoPaper Export PDF",
+      "description": "Export newspaper issue to professional PDF format with cover image",
+      "icon": "📄",
+      "category": "export",
+      "entry": "agents/autopaper/autopaper-export-pdf.md"
+    },
+    {
+      "name": "autopaper-sync-obsidian",
+      "displayName": "AutoPaper Sync Obsidian",
+      "description": "Sync newspaper issue to Obsidian vault with wikilinks",
+      "icon": "🔄",
+      "category": "export",
+      "entry": "agents/autopaper/autopaper-sync-obsidian.md"
+    }
+  ]
+}
