@@ -2,6 +2,8 @@
 
 > AI-Powered Automated Newspaper Generation Tool 🤖📰
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 AutoPaper is a CLI tool that automatically generates curated weekly newspapers from article URLs. It uses Claude AI to extract metadata, compose editorial content, and export to multiple formats.
 
 ## ✨ Features
@@ -44,12 +46,43 @@ Then use the skills:
 #### Installation
 
 ```bash
-# Install
+# Clone the repository
+git clone https://github.com/OldCoderIsMe/AutoPaper.git
+cd AutoPaper
+
+# Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install in editable mode
 pip install -e .
 
-# Configure
+# Configure environment
 cp .env.example .env
 # Edit .env and add your ANTHROPIC_API_KEY
+```
+
+#### Making `autopaper` Command Available
+
+After installation, you have two options:
+
+##### Option A: Add to PATH (Recommended for frequent use)
+
+Add this to your `~/.zshrc` (or `~/.bashrc`):
+
+```bash
+# AutoPaper venv
+export PATH="$PATH:/path/to/AutoPaper/venv/bin"
+```
+
+Then reload: `source ~/.zshrc`
+
+##### Option B: Always use with venv activated
+
+```bash
+cd /path/to/AutoPaper
+source venv/bin/activate
+autopaper --help
 ```
 
 ## 🚀 Quick Usage
@@ -257,7 +290,8 @@ AutoPaper automatically generates AI-style infographic cards for each issue:
 - Professional design for sharing on social media
 - Embedded in both PDF and email
 
-**Example cards:**
+#### Example cards
+
 ```bash
 # Generate standalone card
 autopaper generate-card 2026-W05-tech
@@ -324,7 +358,8 @@ AutoPaper supports sending generated issues via email with:
 - **Multiple recipients** - Send to unlimited recipients at once
 - **Major providers** - Gmail, Outlook, QQ Mail, 163 Mail, and more
 
-**Quick Start:**
+### Quick Start
+
 ```bash
 # 1. Configure SMTP in .env
 SMTP_HOST=smtp.gmail.com

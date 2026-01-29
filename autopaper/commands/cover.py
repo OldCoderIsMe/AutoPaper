@@ -9,8 +9,10 @@ from rich.console import Console
 from autopaper.config import config
 
 # Import the cover generators
-sys.path.insert(0, str(Path(__file__).parent.parent))
-from generate_simple_cover import generate_cover_image
+# Add project root to path for imports
+_project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(_project_root))
+from scripts.generate_simple_cover import generate_cover_image
 
 console = Console()
 
