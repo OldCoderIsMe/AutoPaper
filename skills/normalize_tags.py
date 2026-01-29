@@ -1,9 +1,14 @@
 """Skill: Normalize tags using Claude AI."""
 import json
 import os
+import sys
 from typing import Dict, List
 
 from anthropic import Anthropic
+
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from autopaper.config import config
 
 
 def normalize_tags(tags: List[str], custom_rules: Dict[str, List[str]] = None) -> List[str]:
@@ -34,15 +39,15 @@ def normalize_tags(tags: List[str], custom_rules: Dict[str, List[str]] = None) -
 
     rules = custom_rules or default_rules
 
-    # Get API key (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
-    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
+    # Get API key from config (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
+    api_key = config.get_anthropic_api_key()
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN environment variable not set")
 
-    # Get optional custom base URL (for proxy/custom endpoint)
-    base_url = os.getenv("ANTHROPIC_BASE_URL")
-    # Get model (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_HAIKU_MODEL, or default)
-    model = os.getenv("ANTHROPIC_MODEL") or os.getenv("ANTHROPIC_DEFAULT_HAIKU_MODEL") or "claude-haiku-4-20250514"
+    # Get optional custom base URL from config (for proxy/custom endpoint)
+    base_url = config.get_anthropic_base_url()
+    # Get model from config (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_HAIKU_MODEL, or default)
+    model = config.get_anthropic_model() or config.get_anthropic_haiku_model() or "claude-haiku-4-20250514"
 
     client_kwargs = {"api_key": api_key}
     if base_url:

@@ -1,23 +1,84 @@
 """Configuration management for AutoPaper."""
 import os
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any, Dict, List, Optional
 
 import yaml
 from dotenv import load_dotenv
 
 
+def find_project_root() -> Path:
+    """Find the project root directory by searching for config.yaml.
+
+    Searches upward from current directory until config.yaml is found.
+    If not found, returns current directory.
+
+    Returns:
+        Path to project root directory
+    """
+    current = Path.cwd()
+
+    # Check if config path is explicitly set via environment variable
+    explicit_path = os.getenv("AUTOPAPER_CONFIG_PATH")
+    if explicit_path:
+        explicit_config = Path(explicit_path)
+        if explicit_config.is_absolute():
+            return explicit_config.parent
+        return current / explicit_config.parent
+
+    # Search upward for config.yaml
+    while current != current.parent:
+        if (current / "config.yaml").exists():
+            return current
+        # Also check for pyproject.toml as a project marker
+        if (current / "pyproject.toml").exists():
+            return current
+        current = current.parent
+
+    # Fallback to current directory
+    return Path.cwd()
+
+
+def get_default_config_path() -> str:
+    """Get the default configuration file path.
+
+    First checks AUTOPAPER_CONFIG_PATH environment variable.
+    Then searches for config.yaml in project root.
+    Falls back to 'config.yaml' in current directory.
+
+    Returns:
+        Path to config file as string
+    """
+    # Check environment variable first
+    explicit_path = os.getenv("AUTOPAPER_CONFIG_PATH")
+    if explicit_path:
+        return explicit_path
+
+    # Find project root and check for config.yaml
+    project_root = find_project_root()
+    config_path = project_root / "config.yaml"
+
+    if config_path.exists():
+        return str(config_path)
+
+    # Fallback to default
+    return "config.yaml"
+
+
 class Config:
     """Configuration manager for AutoPaper."""
 
-    def __init__(self, config_path: str = "config.yaml"):
+    def __init__(self, config_path: Optional[str] = None):
         """Initialize configuration.
 
         Args:
-            config_path: Path to configuration file
+            config_path: Path to configuration file. If None, uses get_default_config_path()
         """
         # Load environment variables from .env file
         load_dotenv()
+
+        if config_path is None:
+            config_path = get_default_config_path()
 
         self.config_path = Path(config_path)
         self.config: Dict[str, Any] = {}

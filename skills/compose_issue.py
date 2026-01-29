@@ -9,6 +9,7 @@ from anthropic import Anthropic
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from autopaper.config import config
 from autopaper.utils.json_parser import parse_ai_json_response
 
 
@@ -33,15 +34,15 @@ def compose_issue(
             "news_briefs": List[Dict]  # Quick news items
         }
     """
-    # Get API key (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
-    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
+    # Get API key from config (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
+    api_key = config.get_anthropic_api_key()
     if not api_key:
         raise ValueError("ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN environment variable not set")
 
-    # Get optional custom base URL (for proxy/custom endpoint)
-    base_url = os.getenv("ANTHROPIC_BASE_URL")
-    # Get model (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_SONNET_MODEL, or default)
-    model = os.getenv("ANTHROPIC_MODEL") or os.getenv("ANTHROPIC_DEFAULT_SONNET_MODEL") or "claude-sonnet-4-5-20250929"
+    # Get optional custom base URL from config (for proxy/custom endpoint)
+    base_url = config.get_anthropic_base_url()
+    # Get model from config (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_SONNET_MODEL, or default)
+    model = config.get_anthropic_model() or config.get_anthropic_sonnet_model() or config.get_model()
 
     client_kwargs = {"api_key": api_key}
     if base_url:
@@ -143,7 +144,9 @@ IMPORTANT: Include the "url" field in article_blocks using the url from the arti
 
     try:
         response = client.messages.create(
-            model=model, max_tokens=8192, messages=[{"role": "user", "content": prompt}]
+            model=model,
+            max_tokens=config.get_max_tokens() * 2,  # Issue generation needs more tokens
+            messages=[{"role": "user", "content": prompt}]
         )
 
         # Parse JSON response using unified parser
