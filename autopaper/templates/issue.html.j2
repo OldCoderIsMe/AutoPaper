@@ -184,19 +184,19 @@
             .article-block {
                 page-break-inside: avoid;
             }
-            .infoq-card {
+            .ai-card {
                 page-break-after: always;
                 margin-bottom: 30px;
             }
         }
 
-        .infoq-card {
+        .ai-card {
             text-align: center;
             margin-bottom: 40px;
             page-break-inside: avoid;
         }
 
-        .infoq-card img {
+        .ai-card img {
             max-width: 100%;
             height: auto;
             border-radius: 8px;
@@ -216,17 +216,17 @@
         <div class="article-block">
             {{ introduction|safe }}
         </div>
-        {% if infoq_card %}
-        <div class="infoq-card">
-            <img src="{{ infoq_card }}" alt="{{ title }} - InfoQ Card"/>
-        </div>
-        {% endif %}
     </div>
     {% endif %}
 
     {% if trends %}
     <div class="section">
         <h2>核心趋势</h2>
+        {% if ai_card %}
+        <div class="ai-card">
+            <img src="{{ ai_card }}" alt="{{ title }} - AI Card"/>
+        </div>
+        {% endif %}
         <div class="article-block">
             {{ trends|safe }}
         </div>

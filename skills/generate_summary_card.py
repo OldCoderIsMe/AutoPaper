@@ -25,11 +25,21 @@ def generate_weekly_summary_card(
     Returns:
         SVG code as string
     """
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # Get API key (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
+    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
     if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+        raise ValueError("ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN environment variable not set")
 
-    client = Anthropic(api_key=api_key)
+    # Get optional custom base URL (for proxy/custom endpoint)
+    base_url = os.getenv("ANTHROPIC_BASE_URL")
+    # Get model (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_SONNET_MODEL, or default)
+    model = os.getenv("ANTHROPIC_MODEL") or os.getenv("ANTHROPIC_DEFAULT_SONNET_MODEL") or "claude-sonnet-4-20250514"
+
+    client_kwargs = {"api_key": api_key}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+
+    client = Anthropic(**client_kwargs)
 
     # Define color schemes
     if style == "tech":
@@ -162,7 +172,7 @@ def generate_weekly_summary_card(
 
     try:
         response = client.messages.create(
-            model="claude-sonnet-4-20250514",
+            model=model,
             max_tokens=8192,
             messages=[{"role": "user", "content": prompt}],
         )

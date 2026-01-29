@@ -130,9 +130,49 @@ class Config:
         """Get Anthropic API key.
 
         Returns:
-            Anthropic API key from environment
+            Anthropic API key from environment (supports ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN)
         """
-        return os.getenv("ANTHROPIC_API_KEY", "")
+        return os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN", "")
+
+    def get_anthropic_base_url(self) -> str:
+        """Get Anthropic API base URL.
+
+        Returns:
+            Custom base URL from environment (e.g., for proxy), or default
+        """
+        return os.getenv("ANTHROPIC_BASE_URL", "")
+
+    def get_anthropic_model(self) -> str:
+        """Get default Anthropic model.
+
+        Returns:
+            Model name from ANTHROPIC_MODEL environment variable
+        """
+        return os.getenv("ANTHROPIC_MODEL", "")
+
+    def get_anthropic_sonnet_model(self) -> str:
+        """Get Anthropic Sonnet model.
+
+        Returns:
+            Sonnet model name from ANTHROPIC_DEFAULT_SONNET_MODEL environment variable
+        """
+        return os.getenv("ANTHROPIC_DEFAULT_SONNET_MODEL", "")
+
+    def get_anthropic_opus_model(self) -> str:
+        """Get Anthropic Opus model.
+
+        Returns:
+            Opus model name from ANTHROPIC_DEFAULT_OPUS_MODEL environment variable
+        """
+        return os.getenv("ANTHROPIC_DEFAULT_OPUS_MODEL", "")
+
+    def get_anthropic_haiku_model(self) -> str:
+        """Get Anthropic Haiku model.
+
+        Returns:
+            Haiku model name from ANTHROPIC_DEFAULT_HAIKU_MODEL environment variable
+        """
+        return os.getenv("ANTHROPIC_DEFAULT_HAIKU_MODEL", "")
 
     def get_model(self) -> str:
         """Get Claude model to use.
@@ -165,6 +205,64 @@ class Config:
             PDF configuration dictionary
         """
         return self.get("pdf", {})
+
+    def get_smtp_host(self) -> str:
+        """Get SMTP host.
+
+        Returns:
+            SMTP host address
+        """
+        return os.getenv("SMTP_HOST", "")
+
+    def get_smtp_port(self) -> int:
+        """Get SMTP port.
+
+        Returns:
+            SMTP port number
+        """
+        port = os.getenv("SMTP_PORT", "587")
+        try:
+            return int(port)
+        except ValueError:
+            return 587
+
+    def get_smtp_username(self) -> str:
+        """Get SMTP username.
+
+        Returns:
+            SMTP username (usually email address)
+        """
+        return os.getenv("EMAIL_USERNAME", "")
+
+    def get_smtp_password(self) -> str:
+        """Get SMTP password.
+
+        Returns:
+            SMTP password or app-specific password
+        """
+        return os.getenv("EMAIL_PASSWORD", "")
+
+    def get_email_from(self) -> str:
+        """Get sender email address.
+
+        Returns:
+            Sender email address (e.g., "AutoPaper <email@example.com>")
+        """
+        return os.getenv("EMAIL_FROM", "")
+
+    def get_email_config(self) -> Dict[str, Any]:
+        """Get complete email configuration.
+
+        Returns:
+            Email configuration dictionary
+        """
+        return {
+            "host": self.get_smtp_host(),
+            "port": self.get_smtp_port(),
+            "username": self.get_smtp_username(),
+            "password": self.get_smtp_password(),
+            "from_addr": self.get_email_from(),
+        }
 
     def ensure_directories(self):
         """Ensure all required directories exist."""

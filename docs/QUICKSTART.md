@@ -14,7 +14,22 @@ pip install -e .
 2. **Configure environment:**
 ```bash
 cp .env.example .env
-# Edit .env and add your ANTHROPIC_API_KEY
+# Edit .env and add your API configuration
+```
+
+Example `.env` configuration:
+
+```bash
+# For Anthropic Claude (default):
+ANTHROPIC_API_KEY=sk-ant-xxxxx
+ANTHROPIC_BASE_URL=https://api.anthropic.com
+ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
+
+# For 智谱AI (GLM-4):
+# ANTHROPIC_API_KEY=your_glm_api_key
+# ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/anthropic
+# ANTHROPIC_MODEL=glm-4.7
+# ANTHROPIC_DEFAULT_SONNET_MODEL=glm-4.7
 ```
 
 ## Basic Usage
@@ -143,8 +158,20 @@ python -m pytest tests/ -v
 
 ### "ANTHROPIC_API_KEY not set"
 Add your API key to `.env` file:
-```
+```bash
+# Option 1: Use ANTHROPIC_API_KEY
 ANTHROPIC_API_KEY=your_key_here
+
+# Option 2: Use ANTHROPIC_AUTH_TOKEN (alternative)
+ANTHROPIC_AUTH_TOKEN=your_token_here
+```
+
+### API request failed
+If using a custom API endpoint or proxy, configure `ANTHROPIC_BASE_URL`:
+```bash
+# For example, using 智谱AI:
+ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/anthropic
+ANTHROPIC_MODEL=glm-4.7
 ```
 
 ### "Module not found" error

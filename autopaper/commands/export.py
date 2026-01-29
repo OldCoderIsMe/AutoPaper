@@ -131,13 +131,13 @@ def export_pdf(
     else:
         title = f"本周行业动态 · {issue.slug[:8]}"
 
-    # Generate InfoQ card and convert to PNG (optional, can be slow)
+    # Generate AI card and convert to PNG (optional, can be slow)
     card_png_path = None
     if not no_card:
-        console.print("[cyan]Generating InfoQ card...[/cyan]")
+        console.print("[cyan]Generating AI card...[/cyan]")
         card_png_path = _generate_and_convert_card(issue_markdown, title, issue.issue_type, issues_dir, issue_slug)
     else:
-        console.print("[dim]Skipping InfoQ card generation (--no-card flag)[/dim]")
+        console.print("[dim]Skipping AI card generation (--no-card flag)[/dim]")
 
     # Render HTML template
     template_path = Path(__file__).parent.parent / "templates" / "issue.html.j2"
@@ -150,7 +150,7 @@ def export_pdf(
         title=title,
         week_range=f"{issue.start_date} to {issue.end_date}",
         generated_at=issue.created_at.strftime("%Y-%m-%d") if issue.created_at else "",
-        infoq_card=card_png_path,
+        ai_card=card_png_path,
         **sections,
     )
 
@@ -407,22 +407,53 @@ def _parse_article_blocks(content: str) -> list:
     lines = content.split("\n")
 
     for line in lines:
-        if line.startswith("### "):
-            # Save previous block
-            if current_block:
+        # Check for wikilink slug FIRST (before ###)
+        if "[[" in line and "]]" in line and line.strip().startswith("[["):
+            # Extract slug reference that appears before title
+            start = line.find("[[") + 2
+            end = line.find("]]", start)
+            slug = line[start:end]
+
+            # Save previous block if exists and is complete
+            if current_block and (current_block.get("title") or current_block.get("content")):
                 current_block["content"] = "\n".join(current_content).strip()
                 blocks.append(current_block)
+                current_content = []
 
-            # Start new block
+            # Create new block for the upcoming article with this slug
             current_block = {
-                "title": line[4:].strip(),
-                "slug": "",
+                "title": "",
+                "slug": slug,
                 "content": "",
                 "tags": [],
                 "url": "",
                 "cover_image": None
             }
-            current_content = []
+
+        elif line.startswith("### "):
+            title = line[4:].strip()
+
+            # If we already have a block from [[slug]], just update the title
+            if current_block and not current_block.get("title") and current_block.get("slug"):
+                # Block was created by [[slug]], now set the title
+                current_block["title"] = title
+            else:
+                # Save previous block if exists
+                if current_block:
+                    current_block["content"] = "\n".join(current_content).strip()
+                    if current_block.get("title") or current_block.get("slug"):
+                        blocks.append(current_block)
+                    current_content = []
+
+                # Start new block
+                current_block = {
+                    "title": title,
+                    "slug": "",
+                    "content": "",
+                    "tags": [],
+                    "url": "",
+                    "cover_image": None
+                }
 
         elif line.startswith("**标签**:") or line.startswith("**Tags**:"):
             # Extract tags
@@ -458,14 +489,6 @@ def _parse_article_blocks(content: str) -> list:
                     img_url = line[img_start:img_end]
                     if current_block:
                         current_block["cover_image"] = img_url
-
-        elif "(See:" in line or "[[" in line:
-            # Extract slug reference
-            if "[[" in line and "]]" in line:
-                start = line.find("[[") + 2
-                end = line.find("]]", start)
-                if current_block:
-                    current_block["slug"] = line[start:end]
 
         else:
             current_content.append(line)
@@ -507,7 +530,7 @@ def _parse_news_briefs(content: str) -> list:
 def _generate_and_convert_card(
     issue_markdown: str, title: str, issue_type: str, issues_dir: Path, issue_slug: str
 ) -> str:
-    """Generate InfoQ card SVG and convert to PNG.
+    """Generate AI card SVG and convert to PNG.
 
     Args:
         issue_markdown: Issue markdown content
@@ -525,7 +548,7 @@ def _generate_and_convert_card(
         import generate_infocard
 
         # Generate SVG card
-        card_svg_path = issues_dir / f"{issue_slug}-infocard.svg"
+        card_svg_path = issues_dir / f"{issue_slug}-aicard.svg"
         svg_code = generate_infocard.generate_infocard(
             content=issue_markdown, title=title, style=issue_type, key_points=None
         )
@@ -534,7 +557,7 @@ def _generate_and_convert_card(
         generate_infocard.save_infocard(svg_code, str(card_svg_path))
 
         # Convert SVG to PNG using cairosvg (with better font handling)
-        card_png_path = issues_dir / f"{issue_slug}-infocard.png"
+        card_png_path = issues_dir / f"{issue_slug}-aicard.png"
 
         try:
             import cairosvg
@@ -563,9 +586,9 @@ def _generate_and_convert_card(
                 console.print("[dim]SVG file saved, but PNG conversion skipped[/dim]")
                 return card_svg_path.name
 
-        console.print(f"  [dim]✓ InfoQ card generated: {card_png_path.name}[/dim]")
+        console.print(f"  [dim]✓ AI card generated: {card_png_path.name}[/dim]")
         return card_png_path.name
 
     except Exception as e:
-        console.print(f"[yellow]Warning: Failed to generate InfoQ card: {e}[/yellow]")
+        console.print(f"[yellow]Warning: Failed to generate AI card: {e}[/yellow]")
         return None

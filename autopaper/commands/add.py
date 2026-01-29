@@ -4,6 +4,7 @@ import os
 import sys
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import urlparse
 
 import requests
 import typer
@@ -162,13 +163,20 @@ def add(
             )
 
     # Create article object (store local path instead of remote URL)
+    added_date = datetime.now()
+    # Use publish_date from metadata, or fall back to added_date if empty
+    publish_date = metadata.get("publish_date", "")
+    if not publish_date or publish_date.strip() == "":
+        publish_date = added_date.strftime("%Y-%m-%d")
+        console.print(f"  [dim]ℹ Using added date as publish date: {publish_date}[/dim]")
+
     article = Article(
         url=url,
         title=metadata["title"],
         author=metadata["author"],
         source=metadata["source"],
-        publish_date=metadata["publish_date"],
-        added_date=datetime.now(),
+        publish_date=publish_date,
+        added_date=added_date,
         summary=metadata["summary"],
         tags=metadata["tags"],
         article_type=metadata["article_type"],
@@ -201,6 +209,7 @@ def add(
         console.print(f"[green]✓[/green] Article added successfully!")
     console.print(f"  [dim]ID:[/dim] {article.id}")
     console.print(f"  [dim]Title:[/dim] {article.title}")
+    console.print(f"  [dim]Publish Date:[/dim] {article.publish_date}")
     console.print(f"  [dim]Type:[/dim] {article.article_type}")
     console.print(f"  [dim]Tags:[/dim] {', '.join(article.tags)}")
     console.print(f"  [dim]Slug:[/dim] {article.slug}")

@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ title }}</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 40px 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            border-bottom: 3px solid #3498db;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+        .header h1 {
+            color: #2c3e50;
+            margin: 0;
+            font-size: 28px;
+        }
+        .meta {
+            color: #7f8c8d;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .section {
+            margin: 30px 0;
+        }
+        .section h2 {
+            color: #34495e;
+            font-size: 20px;
+            border-left: 4px solid #3498db;
+            padding-left: 15px;
+            margin-top: 0;
+        }
+        .introduction {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 5px;
+            font-style: italic;
+        }
+        .trend-item {
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .trend-number {
+            color: #3498db;
+            font-weight: bold;
+        }
+        .trend-title {
+            color: #2c3e50;
+        }
+        .article {
+            margin: 25px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 5px;
+            border-left: 3px solid #3498db;
+        }
+        .article h3 {
+            color: #2c3e50;
+            margin-top: 0;
+            font-size: 18px;
+        }
+        .article-content {
+            color: #555;
+            margin: 10px 0;
+        }
+        .article-tags {
+            margin: 10px 0;
+        }
+        .tag {
+            display: inline-block;
+            background: #3498db;
+            color: #fff;
+            padding: 3px 10px;
+            border-radius: 12px;
+            font-size: 12px;
+            margin-right: 5px;
+            margin-bottom: 5px;
+        }
+        .article-link {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #3498db;
+            color: #fff;
+            text-decoration: none;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+        .article-link:hover {
+            background: #2980b9;
+        }
+        .news-brief {
+            padding: 10px 0;
+            border-bottom: 1px dashed #ddd;
+        }
+        .news-brief:last-child {
+            border-bottom: none;
+        }
+        .news-brief-title {
+            color: #2c3e50;
+            font-weight: bold;
+        }
+        .news-brief-summary {
+            color: #666;
+            margin-top: 5px;
+        }
+        .footer {
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 2px solid #eee;
+            text-align: center;
+            color: #95a5a6;
+            font-size: 12px;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        @media only screen and (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 20px 15px;
+            }
+            .header h1 {
+                font-size: 24px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>{{ title }}</h1>
+            <div class="meta">
+                <p>{{ week_range }}</p>
+                {% if generated_at %}
+                <p>生成于: {{ generated_at }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        {% if introduction %}
+        <div class="section">
+            <h2>主编导语</h2>
+            <div class="introduction">
+                {{ introduction | safe }}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if trends %}
+        <div class="section">
+            <h2>核心趋势</h2>
+            {% if ai_card_base64 %}
+            <div class="ai-card" style="text-align: center; margin: 20px 0;">
+                <img src="data:image/png;base64,{{ ai_card_base64 }}" alt="{{ title }} - AI Card" style="max-width: 100%; height: auto; border-radius: 8px; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);"/>
+            </div>
+            {% endif %}
+            {{ trends | safe }}
+        </div>
+        {% endif %}
+
+        {% if article_blocks %}
+        <div class="section">
+            <h2>深度文章</h2>
+            {% for article in article_blocks %}
+            <div class="article">
+                <h3>{{ article.title }}</h3>
+                {% if article.content_html %}
+                <div class="article-content">
+                    {{ article.content_html | safe }}
+                </div>
+                {% elif article.content %}
+                <div class="article-content">
+                    {{ article.content[:300] }}{% if article.content | length > 300 %}...{% endif %}
+                </div>
+                {% endif %}
+                {% if article.tags %}
+                <div class="article-tags">
+                    {% for tag in article.tags %}
+                    <span class="tag">{{ tag }}</span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                {% if article.url %}
+                <a href="{{ article.url }}" class="article-link">阅读原文</a>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        {% if news_briefs %}
+        <div class="section">
+            <h2>快讯速览</h2>
+            {% for brief in news_briefs %}
+            <div class="news-brief">
+                <div class="news-brief-title">{{ brief.title }}</div>
+                <div class="news-brief-summary">{{ brief.summary }}</div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="footer">
+            <p>本邮件由 <a href="https://github.com/OldCoderIsMe/AutoPaper">AutoPaper</a> 自动生成</p>
+            {% if generated_at %}
+            <p>生成时间: {{ generated_at }}</p>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

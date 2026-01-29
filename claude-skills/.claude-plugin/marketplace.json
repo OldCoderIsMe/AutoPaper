@@ -1,0 +1,26 @@
+{
+  "name": "autopaper-skills",
+  "owner": {
+    "name": "OldCoderIsMe",
+    "email": "qialibutuozhu@outlook.com"
+  },
+  "metadata": {
+    "description": "AI-powered automated newspaper generation skills for Claude Code",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "autopaper",
+      "description": "AutoPaper - AI-powered automated newspaper generation tool",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/autopaper-add",
+        "./skills/autopaper-list",
+        "./skills/autopaper-generate",
+        "./skills/autopaper-export-pdf",
+        "./skills/autopaper-sync-obsidian"
+      ]
+    }
+  ]
+}

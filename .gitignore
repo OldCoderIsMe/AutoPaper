@@ -61,7 +61,18 @@ issues/*_images/
 *.sqlite3
 db.sqlite
 
-# Generated covers
-generate_*_cover.py
+# Test and temporary files
+test_*.py
+*_test.py
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+
+# Development scripts (these are in scripts/ directory)
+# (kept for historical reference but not actively used)
 backfill_images.py
 update_to_remote_urls.py
+generate_*_cover.py
+generate_infographic.py

@@ -48,11 +48,21 @@ def extract_article_metadata(url: str, content: str) -> Dict[str, Any]:
         print(f"[CACHE HIT] Using cached metadata for {url}", file=sys.stderr)
         return cached
 
-    api_key = os.getenv("ANTHROPIC_API_KEY")
+    # Get API key (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
+    api_key = os.getenv("ANTHROPIC_API_KEY") or os.getenv("ANTHROPIC_AUTH_TOKEN")
     if not api_key:
-        raise ValueError("ANTHROPIC_API_KEY environment variable not set")
+        raise ValueError("ANTHROPIC_API_KEY or ANTHROPIC_AUTH_TOKEN environment variable not set")
 
-    client = Anthropic(api_key=api_key)
+    # Get optional custom base URL (for proxy/custom endpoint)
+    base_url = os.getenv("ANTHROPIC_BASE_URL")
+    # Get model (supports ANTHROPIC_MODEL, ANTHROPIC_DEFAULT_SONNET_MODEL, or default)
+    model = os.getenv("ANTHROPIC_MODEL") or os.getenv("ANTHROPIC_DEFAULT_SONNET_MODEL") or "claude-sonnet-4-5-20250929"
+
+    client_kwargs = {"api_key": api_key}
+    if base_url:
+        client_kwargs["base_url"] = base_url
+
+    client = Anthropic(**client_kwargs)
 
     prompt = f"""You are an article metadata extractor. Analyze the following article and extract metadata.
 
@@ -86,7 +96,7 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text."""
     @retry(max_attempts=3, backoff_factor=2.0, exceptions=(APIError, APITimeoutError, ConnectionError))
     def call_claude():
         return client.messages.create(
-            model="claude-sonnet-4-5-20250929",
+            model=model,
             max_tokens=4096,
             messages=[{"role": "user", "content": prompt}],
         )

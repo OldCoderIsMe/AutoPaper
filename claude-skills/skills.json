@@ -1,60 +1,43 @@
 {
-  "marketplace": {
-    "name": "autopaper-skills",
-    "displayName": "AutoPaper Skills",
-    "description": "AI-powered automated newspaper generation tool for Claude Code",
-    "version": "0.1.0",
-    "author": "OldCoderIsMe",
-    "repository": "OldCoderIsMe/AutoPaper",
-    "icon": "📰",
-    "category": "content-creation"
+  "name": "autopaper-skills",
+  "version": "0.1.0",
+  "description": "AI-powered automated newspaper generation skills for Claude Code",
+  "author": "OldCoderIsMe",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/OldCoderIsMe/AutoPaper.git"
   },
   "skills": [
     {
       "name": "autopaper-add",
-      "displayName": "AutoPaper Add Article",
-      "description": "Add article from URL to AutoPaper database with AI-powered metadata extraction",
-      "icon": "➕",
-      "category": "content-curation",
-      "entry": "agents/autopaper/autopaper-add.md",
-      "environment": {
-        "ANTHROPIC_API_KEY": {
-          "description": "Anthropic API key for AI features",
-          "required": true,
-          "secret": true
-        }
-      }
+      "description": "Add article from URL to AutoPaper database",
+      "command": "python autopaper/commands/add.py",
+      "icon": "➕"
+    },
+    {
+      "name": "autopaper-list",
+      "description": "List all articles in AutoPaper database",
+      "command": "python autopaper/commands/list.py",
+      "icon": "📋"
     },
     {
       "name": "autopaper-generate",
-      "displayName": "AutoPaper Generate Issue",
-      "description": "Generate weekly newspaper issue from collected articles with AI-composed editorial content",
-      "icon": "📰",
-      "category": "content-creation",
-      "entry": "agents/autopaper/autopaper-generate.md",
-      "environment": {
-        "ANTHROPIC_API_KEY": {
-          "description": "Anthropic API key for AI features",
-          "required": true,
-          "secret": true
-        }
-      }
+      "description": "Generate weekly issue from collected articles",
+      "command": "python autopaper/commands/generate.py",
+      "icon": "📰"
     },
     {
-      "name": "autopaper-export-pdf",
-      "displayName": "AutoPaper Export PDF",
-      "description": "Export newspaper issue to professional PDF format with cover image",
-      "icon": "📄",
-      "category": "export",
-      "entry": "agents/autopaper/autopaper-export-pdf.md"
+      "name": "autopaper-export",
+      "description": "Export issue to PDF format",
+      "command": "python autopaper/commands/export.py",
+      "icon": "📄"
     },
     {
-      "name": "autopaper-sync-obsidian",
-      "displayName": "AutoPaper Sync Obsidian",
-      "description": "Sync newspaper issue to Obsidian vault with wikilinks",
-      "icon": "🔄",
-      "category": "export",
-      "entry": "agents/autopaper/autopaper-sync-obsidian.md"
+      "name": "autopaper-sync",
+      "description": "Sync issue to Obsidian vault",
+      "command": "python autopaper/commands/sync.py",
+      "icon": "🔄"
     }
   ]
 }

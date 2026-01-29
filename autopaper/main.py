@@ -5,7 +5,7 @@ from pathlib import Path
 import typer
 from rich.console import Console
 
-from autopaper.commands import add, card, generate, export, sync, cover
+from autopaper.commands import add, card, generate, export, sync, cover, email
 import autopaper.commands.list as list_cmd
 from autopaper.config import config
 
@@ -50,6 +50,7 @@ app.command()(export.export_pdf)
 app.command()(sync.sync)
 app.command()(cover.generate_cover)
 app.command()(card.generate_card)
+app.command()(email.send_email)
 
 
 @app.command()
