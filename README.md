@@ -34,6 +34,8 @@ Then use the skills:
 /autopaper-export-pdf 2026-W05-tech
 ```
 
+**Full Configuration Support**: Skills now support complete configuration via `config.yaml` and `.env` files, just like CLI mode. The configuration is automatically discovered from your project root.
+
 📖 See [claude-skills/README.md](claude-skills/README.md) for details.
 
 ### Option 2: CLI Tool (Traditional Python Package)
@@ -198,6 +200,24 @@ AutoPaper/
 ```
 
 ## 🔧 Configuration
+
+AutoPaper supports two modes with **identical configuration features**:
+
+- **CLI Mode**: Use `autopaper` command directly
+- **Skill Mode**: Use via Claude Code (`/autopaper-*` commands)
+
+Both modes support full configuration through `config.yaml` and `.env` files.
+
+### Configuration Discovery
+
+**CLI Mode**: Loads configuration from the current working directory.
+
+**Skill Mode**: Automatically discovers project configuration by:
+1. Searching upward for `config.yaml` from the current directory
+2. Using `AUTOPAPER_CONFIG_PATH` environment variable (if set)
+3. Falling back to sensible defaults
+
+This means skills work from any directory while respecting your project configuration.
 
 ### Environment Variables
 

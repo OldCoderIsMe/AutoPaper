@@ -34,6 +34,8 @@ AutoPaper 是一个命令行工具，可以从文章链接自动生成精选的�
 /autopaper-export-pdf 2026-W05-tech
 ```
 
+**完整配置支持**：Skill 模式现在通过 `config.yaml` 和 `.env` 文件支持完整配置，与 CLI 模式完全一致。配置会自动从项目根目录发现。
+
 📖 详情请参阅 [claude-skills/README.md](claude-skills/README.md)
 
 ### 方式二：CLI 工具（传统 Python 包）
@@ -198,6 +200,24 @@ AutoPaper/
 ```
 
 ## 🔧 配置
+
+AutoPaper 支持两种模式，**配置功能完全一致**：
+
+- **CLI 模式**：直接使用 `autopaper` 命令
+- **Skill 模式**：通过 Claude Code 使用（`/autopaper-*` 命令）
+
+两种模式都支持通过 `config.yaml` 和 `.env` 文件进行完整配置。
+
+### 配置发现机制
+
+**CLI 模式**：从当前工作目录加载配置。
+
+**Skill 模式**：自动发现项目配置：
+1. 从当前目录向上搜索 `config.yaml`
+2. 使用 `AUTOPAPER_CONFIG_PATH` 环境变量（如果设置）
+3. 回退到合理的默认值
+
+这意味着 skill 可以在任何目录下工作，同时尊重你的项目配置。
 
 ### 环境变量
 

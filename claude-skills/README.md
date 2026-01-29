@@ -79,29 +79,150 @@ Just tell Claude Code:
 
 ## ⚙️ Configuration
 
-### Environment Variables
+### Overview
+
+AutoPaper skills support **complete configuration system** just like CLI mode:
+
+- ✅ `.env` file support
+- ✅ `config.yaml` file support
+- ✅ Automatic project root discovery
+- ✅ Environment variable overrides
+- ✅ All configuration options available
+
+### Configuration Discovery
+
+Skills automatically load configuration from:
+
+1. **Project Root** (auto-discovered)
+   - Searches upward from current directory for `config.yaml`
+   - Stops at project root when found
+   - Fallback to current directory if not found
+
+2. **Custom Path** (optional override)
+   ```bash
+   export AUTOPAPER_CONFIG_PATH=/path/to/custom-config.yaml
+   /autopaper-add https://example.com/article
+   ```
+
+This means you can run skills from **any directory** and they will automatically find and use your project configuration.
+
+### Environment Variables (.env)
 
 Create `.env` file in your project root:
 
 ```bash
-# Required
+# ============================================
+# API Configuration
+# ============================================
+
+# API Key - supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN
 ANTHROPIC_API_KEY=your_api_key_here
 
-# Optional
-CACHE_ENABLED=true
-CACHE_TTL=86400
-LOG_LEVEL=INFO
+# API Base URL (optional - for custom endpoints or proxy)
+# Default: https://api.anthropic.com
+# Example for 智谱AI (GLM-4):
+ANTHROPIC_BASE_URL=https://open.bigmodel.cn/api/anthropic
+
+# Model Configuration (optional)
+# ANTHROPIC_MODEL - default model for all requests
+# ANTHROPIC_DEFAULT_SONNET_MODEL - for Sonnet-specific requests
+# ANTHROPIC_DEFAULT_OPUS_MODEL - for Opus-specific requests
+# ANTHROPIC_DEFAULT_HAIKU_MODEL - for Haiku-specific requests
+#
+# Example for GLM-4 (智谱AI):
+ANTHROPIC_MODEL=glm-4.7
+ANTHROPIC_DEFAULT_SONNET_MODEL=glm-4.7
+#
+# Example for Claude (Anthropic):
+# ANTHROPIC_MODEL=claude-sonnet-4-5-20250929
+# ANTHROPIC_DEFAULT_SONNET_MODEL=claude-sonnet-4-5-20250929
+
+# ============================================
+# Email Configuration (SMTP)
+# ============================================
+
+# SMTP Server Configuration
+SMTP_HOST=smtp.gmail.com
+SMTP_PORT=587
+EMAIL_USERNAME=your_email@gmail.com
+EMAIL_PASSWORD=your_app_password
+EMAIL_FROM=AutoPaper <your_email@gmail.com>
+
+# Common SMTP Servers:
+# - Gmail: smtp.gmail.com:587
+# - Outlook: smtp-mail.outlook.com:587
+# - QQ Mail: smtp.qq.com:587
+# - 163 Mail: smtp.163.com:465
 ```
 
-### Obsidian Configuration
+### Configuration File (config.yaml)
 
-Edit `config.yaml`:
+Edit `config.yaml` in your project root:
 
 ```yaml
+# Database
+database_path: data/db.sqlite
+
+# Article storage
+articles:
+  raw_dir: articles/raw
+  parsed_dir: articles/parsed
+  enriched_dir: articles/enriched
+  images_dir: articles/images
+
+# Issues storage
+issues_dir: issues
+
+# Obsidian sync
 obsidian:
   vault_path: ~/Documents/ObsidianVault
   auto_paper_folder: AutoPaper
+
+# Tag normalization rules
+tag_normalization:
+  llm: [llm, large language model, gpt]
+  kubernetes: [k8s]
+  ai: [ai, artificial intelligence, 人工智能]
+
+# API settings
+api:
+  model: claude-sonnet-4-5-20250929
+  max_tokens: 4096
+
+# PDF export settings
+pdf:
+  page_size: A4
+  margin_top: 20mm
+  margin_bottom: 20mm
+  margin_left: 15mm
+  margin_right: 15mm
 ```
+
+### Priority Order
+
+Configuration is loaded in this priority order (highest to lowest):
+
+1. **Environment Variables** - Direct overrides (e.g., `ANTHROPIC_API_KEY`)
+2. **config.yaml** - Project configuration file
+3. **Defaults** - Built-in sensible defaults
+
+### Example: Multiple Projects
+
+You can maintain different configurations for different projects:
+
+```
+~/projects/tech-weekly/
+  ├── config.yaml      # Custom config for tech weekly
+  ├── .env             # Project-specific API keys
+  └── articles/
+
+~/projects/news-digest/
+  ├── config.yaml      # Different config for news digest
+  ├── .env             # Different API keys
+  └── articles/
+```
+
+Skills will automatically use the correct configuration based on your current working directory.
 
 ## 🎨 Customization
 
