@@ -1,60 +1,31 @@
 {
   "name": "autopaper-skills",
-  "displayName": "AutoPaper Skills",
-  "description": "AI-powered automated newspaper generation tool for Claude Code",
-  "version": "0.1.0",
-  "author": "OldCoderIsMe",
-  "license": "MIT",
-  "repository": "OldCoderIsMe/AutoPaper",
-  "homepage": "https://github.com/OldCoderIsMe/AutoPaper#readme",
-  "icon": "📰",
-  "category": "content-creation",
-  "skills": [
+  "owner": {
+    "name": "OldCoderIsMe",
+    "email": "qialibutuozhu@outlook.com"
+  },
+  "metadata": {
+    "description": "AI-powered automated newspaper generation tool for Claude Code",
+    "version": "0.1.0",
+    "license": "MIT",
+    "repository": "OldCoderIsMe/AutoPaper",
+    "homepage": "https://github.com/OldCoderIsMe/AutoPaper#readme",
+    "icon": "📰",
+    "category": "content-creation"
+  },
+  "plugins": [
     {
-      "name": "autopaper-add",
-      "displayName": "AutoPaper Add Article",
-      "description": "Add article from URL to AutoPaper database with AI-powered metadata extraction",
-      "icon": "➕",
-      "entry": "autopaper/autopaper-add.md",
-      "command": "python -m autopaper.commands.add",
-      "environment": {
-        "ANTHROPIC_API_KEY": {
-          "description": "Anthropic API key for AI features",
-          "required": true,
-          "secret": true
-        }
-      }
-    },
-    {
-      "name": "autopaper-generate",
-      "displayName": "AutoPaper Generate Issue",
-      "description": "Generate weekly newspaper issue from collected articles with AI-composed editorial content",
-      "icon": "📰",
-      "entry": "autopaper/autopaper-generate.md",
-      "command": "python -m autopaper.commands.generate",
-      "environment": {
-        "ANTHROPIC_API_KEY": {
-          "description": "Anthropic API key for AI features",
-          "required": true,
-          "secret": true
-        }
-      }
-    },
-    {
-      "name": "autopaper-export-pdf",
-      "displayName": "AutoPaper Export PDF",
-      "description": "Export newspaper issue to professional PDF format with cover image",
-      "icon": "📄",
-      "entry": "autopaper/autopaper-export-pdf.md",
-      "command": "python -m autopaper.commands.export"
-    },
-    {
-      "name": "autopaper-sync-obsidian",
-      "displayName": "AutoPaper Sync Obsidian",
-      "description": "Sync newspaper issue to Obsidian vault with wikilinks for knowledge management",
-      "icon": "🔄",
-      "entry": "autopaper/autopaper-sync-obsidian.md",
-      "command": "python -m autopaper.commands.sync"
+      "name": "autopaper",
+      "description": "AutoPaper Skills - AI-powered automated newspaper generation",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/autopaper-add",
+        "./skills/autopaper-list",
+        "./skills/autopaper-generate",
+        "./skills/autopaper-export-pdf",
+        "./skills/autopaper-sync-obsidian"
+      ]
     }
   ]
 }
