@@ -1,0 +1,7 @@
+{
+  "name": "generate-card",
+  "description": "Generate AI-style infographic cards (1200x675 SVG) for technical content. Modern dark theme with optimized Chinese font support, perfect for blog covers, social media sharing, and presentations.",
+  "author": {
+    "name": "AutoPaper Contributors"
+  }
+}

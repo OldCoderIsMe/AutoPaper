@@ -1,0 +1,4 @@
+anthropic>=0.18.0
+requests>=2.31.0
+readability-lxml>=0.8.1
+beautifulsoup4>=4.12.0

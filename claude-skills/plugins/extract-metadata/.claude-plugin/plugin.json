@@ -1,0 +1,7 @@
+{
+  "name": "extract-metadata",
+  "description": "Extract structured metadata from article URLs or content using Claude AI. Automatically identifies titles, authors, summaries, tags, key points, and classifies articles as technical or news.",
+  "author": {
+    "name": "AutoPaper Contributors"
+  }
+}

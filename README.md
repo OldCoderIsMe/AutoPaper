@@ -185,6 +185,36 @@ AutoPaper/
 └── issues/             # Generated issues
 ```
 
+## 🧩 Standalone Claude Code Skills
+
+AutoPaper's core AI capabilities are also available as **standalone Claude Code Skills** that can be used independently:
+
+### Available Skills
+
+1. **📝 Article Metadata Extractor**
+   - Extract structured metadata from article URLs or content
+   - Auto-generate summaries, tags, and key points
+   - Classify articles (technical vs news)
+
+2. **🎨 AI Info Card Generator**
+   - Generate beautiful SVG infographic cards (1200x675)
+   - Modern AI tech style with Chinese font support
+   - Perfect for blog covers, social media, presentations
+
+### Quick Start
+
+```bash
+cd claude-skills
+
+# Extract article metadata
+PYTHONPATH=. python3 extract-metadata/main.py https://blog.example.com/article
+
+# Generate info card
+PYTHONPATH=. python3 generate-card/main.py "本周技术精选" --content article.md
+```
+
+**[→ Skills Quick Start](claude-skills/QUICKSTART.md)**
+
 ## 🔧 Configuration
 
 AutoPaper supports two modes with **identical configuration features**:

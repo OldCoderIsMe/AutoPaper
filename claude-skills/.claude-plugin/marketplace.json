@@ -1,0 +1,33 @@
+{
+  "$schema": "https://anthropic.com/claude-code/marketplace.schema.json",
+  "name": "autopaper-skills",
+  "description": "AI-powered content tools from AutoPaper - extract article metadata, generate info cards, and automate content curation workflows",
+  "owner": {
+    "name": "AutoPaper",
+    "email": "noreply@github.com"
+  },
+  "plugins": [
+    {
+      "name": "extract-metadata",
+      "description": "Extract structured metadata from article URLs or content using Claude AI - titles, authors, summaries, tags, and key points",
+      "version": "1.0.0",
+      "author": {
+        "name": "AutoPaper Contributors"
+      },
+      "source": "./plugins/extract-metadata",
+      "category": "productivity",
+      "homepage": "https://github.com/OldCoderIsMe/AutoPaper/tree/main/claude-skills/extract-metadata"
+    },
+    {
+      "name": "generate-card",
+      "description": "Generate AI-style infographic cards (1200x675 SVG) for technical content - perfect for blog covers, social media, and presentations",
+      "version": "1.0.0",
+      "author": {
+        "name": "AutoPaper Contributors"
+      },
+      "source": "./plugins/generate-card",
+      "category": "productivity",
+      "homepage": "https://github.com/OldCoderIsMe/AutoPaper/tree/main/claude-skills/generate-card"
+    }
+  ]
+}
