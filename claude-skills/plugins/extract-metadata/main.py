@@ -53,9 +53,10 @@ def scrape_article(url: str) -> str:
         try:
             from readability import Document
 
-            doc = Document(response.content)
+            # Use response.text instead of response.content to avoid bytes/str issues
+            doc = Document(response.text)
             return doc.summary()
-        except ImportError:
+        except (ImportError, Exception) as e:
             # Fallback: just return text content
             from bs4 import BeautifulSoup
 
