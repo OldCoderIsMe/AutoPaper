@@ -70,7 +70,7 @@ test_*.py
 *.swo
 *~
 
-# Development scripts (these are in scripts/ directory)
+# Historical development scripts (scripts/ directory removed)
 # (kept for historical reference but not actively used)
 backfill_images.py
 update_to_remote_urls.py

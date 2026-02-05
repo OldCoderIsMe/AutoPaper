@@ -1,7 +1,6 @@
 """Add article command."""
 import json
 import os
-import sys
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
@@ -10,6 +9,7 @@ import requests
 import typer
 from rich.console import Console
 
+from autopaper.ai import extract_article_metadata
 from autopaper.config import config
 from autopaper.database import Database
 from autopaper.models import Article
@@ -17,13 +17,6 @@ from autopaper.scrapers.article import ArticleScraper
 from autopaper.utils.slug import generate_unique_slug
 from autopaper.utils.logging import get_logger
 from autopaper.utils.profiling import profile, print_profiler_summary
-
-# Import skills
-sys_path = str(Path(__file__).parent.parent.parent / "skills")
-if sys_path not in os.sys.path:
-    os.sys.path.insert(0, sys_path)
-
-import extract_article_metadata
 
 console = Console()
 logger = get_logger(__name__)

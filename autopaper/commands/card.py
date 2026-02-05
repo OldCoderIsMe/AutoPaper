@@ -1,18 +1,11 @@
 """Generate InfoQ-style summary card command."""
-import sys
 from pathlib import Path
 
 import typer
 from rich.console import Console
 
+from autopaper.ai import generate_infocard
 from autopaper.config import config
-
-# Import skill
-sys_path = str(Path(__file__).parent.parent.parent / "skills")
-if sys_path not in sys.path:
-    sys.path.insert(0, sys_path)
-
-import generate_infocard
 
 console = Console()
 

@@ -14,6 +14,7 @@ AutoPaper is a CLI tool that automatically generates curated weekly newspapers f
 - **📄 Multiple Export Formats** - Markdown, PDF, Obsidian vault sync, and Email delivery
 - **📧 Email Distribution** - Send issues via email with AI card, PDF attachments, and HTML rendering
 - **🎨 AI Card Generation** - Beautiful AI-style infographic cards for social sharing
+- **🔗 Article Links Section** - Quick access to all original article URLs at the bottom
 - **⚡ High Performance** - 100x faster with AI caching and concurrent downloads
 - **🛡️ Production Ready** - Robust error handling, retry logic, and comprehensive logging
 
@@ -119,10 +120,11 @@ autopaper sync obsidian 2026-W05-tech
 
 Each generated issue includes:
 
-- **📄 PDF Document** - Professional layout with AI card
-- **📧 Email HTML** - Rich formatted email with embedded AI card
-- **📝 Markdown Source** - Plain text for version control
+- **📄 PDF Document** - Professional layout with AI card and article links
+- **📧 Email HTML** - Rich formatted email with embedded AI card and clickable links
+- **📝 Markdown Source** - Plain text for version control with article links
 - **🎨 AI Card** - Shareable infographic (2400x1350px)
+- **🔗 Article Links** - All original article URLs at the bottom for quick access
 - **🔗 Obsidian Notes** - Integrated into your knowledge base
 
 ### Email Sending Examples
@@ -157,6 +159,7 @@ autopaper send-email 2026-W05-tech \
 | `autopaper generate <type>` | Generate weekly issue (tech/news) |
 | `autopaper export-pdf <slug>` | Export issue to PDF |
 | `autopaper send-email <slug>` | Send issue via email |
+| `autopaper generate-card <slug>` | Generate AI summary card |
 | `autopaper sync obsidian <slug>` | Sync to Obsidian vault |
 
 See `autopaper --help` for all commands and options.
@@ -173,24 +176,26 @@ See `autopaper --help` for all commands and options.
 ```
 AutoPaper/
 ├── autopaper/          # Main package
-│   ├── commands/        # CLI commands
+│   ├── ai/             # AI integration modules
+│   │   ├── compose_issue.py        # Issue composition
+│   │   ├── extract_article_metadata.py  # Metadata extraction
+│   │   ├── generate_infocard.py    # AI card generation
+│   │   └── normalize_tags.py       # Tag normalization
+│   ├── commands/       # CLI commands
 │   │   ├── add.py       # Add articles
 │   │   ├── generate.py  # Generate issues
 │   │   ├── export.py    # PDF export
 │   │   ├── email.py     # Email sending
 │   │   └── sync.py      # Obsidian sync
-│   ├── publishers/      # Export publishers
+│   ├── publishers/     # Export publishers
 │   │   ├── pdf.py       # PDF generation
 │   │   ├── obsidian.py  # Obsidian sync
 │   │   └── email.py     # Email publisher
-│   ├── scrapers/        # Web scraping
-│   ├── templates/       # Jinja2 templates
+│   ├── scrapers/       # Web scraping
+│   ├── templates/      # Jinja2 templates
 │   │   ├── issue.html.j2  # PDF template
 │   │   └── email.html.j2  # Email template
 │   └── utils/          # Utilities
-├── skills/             # AI integration
-│   ├── generate_infocard.py  # AI card generation
-│   └── ...
 ├── tests/              # Test suite
 ├── docs/               # Documentation
 │   ├── QUICKSTART.md
@@ -375,6 +380,7 @@ AutoPaper supports sending generated issues via email with:
 - **Rich HTML emails** - Rendered markdown with AI card embedded
 - **PDF attachments** - High-quality PDF with AI card
 - **Markdown attachments** - Source files for archiving
+- **Article links section** - Quick access to all original article URLs
 - **Multiple recipients** - Send to unlimited recipients at once
 - **Major providers** - Gmail, Outlook, QQ Mail, 163 Mail, and more
 

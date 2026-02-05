@@ -1,7 +1,6 @@
 """Export PDF command."""
 import os
 import re
-import sys
 import time
 from pathlib import Path
 from urllib.parse import urlparse
@@ -349,6 +348,7 @@ def _parse_issue_markdown(markdown: str) -> dict:
     section_map = {
         "主编导语": "introduction",
         "核心趋势": "trends",
+        "核心趋势 (Core Trends)": "trends",
         "深度文章": "article_blocks",
         "快讯速览": "news_briefs",
     }
@@ -544,8 +544,7 @@ def _generate_and_convert_card(
     """
     try:
         # Import skill
-        sys.path.insert(0, str(Path(__file__).parent.parent.parent / "skills"))
-        import generate_infocard
+        from autopaper.ai import generate_infocard
 
         # Generate SVG card
         card_svg_path = issues_dir / f"{issue_slug}-aicard.svg"
@@ -564,7 +563,7 @@ def _generate_and_convert_card(
 
             with open(card_svg_path, "rb") as svg_file:
                 svg_data = svg_file.read()
-                # Use renderbytes for better font support
+                # Use output_width/output_height for precise size control
                 png_data = cairosvg.svg2png(bytestring=svg_data, output_width=2400, output_height=1350)
 
             with open(card_png_path, "wb") as png_file:

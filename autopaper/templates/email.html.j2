@@ -224,6 +224,19 @@
         </div>
         {% endif %}
 
+        {% if article_blocks %}
+        <div class="section">
+            <h2>文章链接</h2>
+            <ul style="list-style: none; padding: 0;">
+                {% for article in article_blocks %}
+                <li style="margin-bottom: 10px;">
+                    <a href="{{ article.url }}" style="color: #3498db; text-decoration: none;">{{ article.title }}</a>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+
         <div class="footer">
             <p>本邮件由 <a href="https://github.com/OldCoderIsMe/AutoPaper">AutoPaper</a> 自动生成</p>
             {% if generated_at %}

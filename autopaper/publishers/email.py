@@ -209,11 +209,8 @@ class EmailPublisher:
         ai_card_base64 = None
         try:
             # Import skill to generate card
-            import sys
             from pathlib import Path as LibPath
-
-            sys.path.insert(0, str(LibPath(__file__).parent.parent.parent / "skills"))
-            import generate_infocard
+            from autopaper.ai import generate_infocard
 
             # Determine title
             if issue.issue_type == "tech":

@@ -1,7 +1,6 @@
 """Generate issue command."""
 import json
 import os
-import sys
 from datetime import datetime
 from pathlib import Path
 from typing import Optional
@@ -10,18 +9,12 @@ import typer
 from jinja2 import Template
 from rich.console import Console
 
+from autopaper.ai import compose_issue
 from autopaper.config import config
 from autopaper.database import Database
 from autopaper.utils.date import get_week_id, get_last_week_id, get_week_range
 from autopaper.utils.logging import get_logger
 from autopaper.utils.json_parser import safe_parse_json
-
-# Import skills
-sys_path = str(Path(__file__).parent.parent.parent / "skills")
-if sys_path not in os.sys.path:
-    os.sys.path.insert(0, sys_path)
-
-import compose_issue
 
 console = Console()
 logger = get_logger(__name__)

@@ -14,6 +14,7 @@ AutoPaper 是一个命令行工具，可以从文章链接自动生成精选的�
 - **📄 多种导出格式** - Markdown、PDF、Obsidian 笔记库同步、邮件发送
 - **📧 邮件分发** - 通过邮件发送期刊，包含 AI 卡片、PDF 附件和 HTML 渲染
 - **🎨 AI 卡片生成** - 生成精美的 AI 风格信息图卡片，便于社交分享
+- **🔗 文章链接汇总** - 底部汇总所有原始文章链接，方便快速访问
 - **⚡ 高性能** - 通过 AI 缓存和并发下载实现 100 倍速度提升
 - **🛡️ 生产就绪** - 强大的错误处理、重试逻辑和全面的日志记录
 
@@ -119,10 +120,11 @@ autopaper sync obsidian 2026-W05-tech
 
 每个生成的期刊包含：
 
-- **📄 PDF 文档** - 专业排版，包含 AI 卡片
-- **📧 邮件 HTML** - 富文本格式邮件，内嵌 AI 卡片
-- **📝 Markdown 源文件** - 纯文本，便于版本控制
+- **📄 PDF 文档** - 专业排版，包含 AI 卡片和文章链接
+- **📧 邮件 HTML** - 富文本格式邮件，内嵌 AI 卡片和可点击链接
+- **📝 Markdown 源文件** - 纯文本，便于版本控制，包含文章链接
 - **🎨 AI 卡片** - 可分享的信息图（2400x1350px）
+- **🔗 文章链接** - 底部汇总所有原始文章链接，方便快速访问
 - **🔗 Obsidian 笔记** - 集成到你的知识库
 
 ### 邮件发送示例
@@ -157,6 +159,7 @@ autopaper send-email 2026-W05-tech \
 | `autopaper generate <type>` | 生成周刊（tech/news） |
 | `autopaper export-pdf <slug>` | 导出期刊为 PDF |
 | `autopaper send-email <slug>` | 通过邮件发送期刊 |
+| `autopaper generate-card <slug>` | 生成 AI 摘要卡片 |
 | `autopaper sync obsidian <slug>` | 同步到 Obsidian 笔记库 |
 
 运行 `autopaper --help` 查看所有命令和选项。
@@ -173,7 +176,12 @@ autopaper send-email 2026-W05-tech \
 ```
 AutoPaper/
 ├── autopaper/          # 主包
-│   ├── commands/        # CLI 命令
+│   ├── ai/             # AI 集成模块
+│   │   ├── compose_issue.py        # 期刊撰写
+│   │   ├── extract_article_metadata.py  # 元数据提取
+│   │   ├── generate_infocard.py    # AI 卡片生成
+│   │   └── normalize_tags.py       # 标签规范化
+│   ├── commands/       # CLI 命令
 │   │   ├── add.py       # 添加文章
 │   │   ├── generate.py  # 生成期刊
 │   │   ├── export.py    # PDF 导出
@@ -188,9 +196,6 @@ AutoPaper/
 │   │   ├── issue.html.j2  # PDF 模板
 │   │   └── email.html.j2  # 邮件模板
 │   └── utils/          # 工具函数
-├── skills/             # AI 集成
-│   ├── generate_infocard.py  # AI 卡片生成
-│   └── ...
 ├── tests/              # 测试套件
 ├── docs/               # 文档
 │   ├── QUICKSTART.md
@@ -375,6 +380,7 @@ AutoPaper 支持通过邮件发送生成的期刊：
 - **富文本邮件** - 渲染 markdown，内嵌 AI 卡片
 - **PDF 附件** - 高质量 PDF，包含 AI 卡片
 - **Markdown 附件** - 源文件归档
+- **文章链接汇总** - 快速访问所有原始文章链接
 - **多收件人** - 一次发送给无限数量的收件人
 - **主流服务商** - Gmail、Outlook、QQ 邮箱、163 邮箱等
 
