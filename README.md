@@ -20,26 +20,7 @@ AutoPaper is a CLI tool that automatically generates curated weekly newspapers f
 
 ## 📦 Quick Start
 
-### Option 1: Claude Code Skills (Recommended for Claude Code Users)
-
-If you use **Claude Code**, install AutoPaper as a skill:
-
-```
-/plugin marketplace add OldCoderIsMe/AutoPaper
-```
-
-Then use the skills:
-```
-/autopaper-add https://blog.example.com/article
-/autopaper-generate tech
-/autopaper-export-pdf 2026-W05-tech
-```
-
-**Full Configuration Support**: Skills now support complete configuration via `config.yaml` and `.env` files, just like CLI mode. The configuration is automatically discovered from your project root.
-
-📖 See [claude-skills/README.md](claude-skills/README.md) for details.
-
-### Option 2: CLI Tool (Traditional Python Package)
+### Option 1: CLI Tool (Traditional Python Package)
 
 #### Prerequisites
 
