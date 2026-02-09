@@ -49,21 +49,33 @@ def scrape_article(url: str) -> str:
         )
         response.raise_for_status()
 
-        # Try to extract readable content
+        # Try to extract readable content using readability-lxml
         try:
             from readability import Document
 
-            doc = Document(response.content)
-            return doc.summary()
-        except ImportError:
-            # Fallback: just return text content
+            # Fix: Decode content to string first to avoid bytes/string pattern errors
+            # Use response.text instead of response.content for proper decoding
+            html_content = response.text
+            doc = Document(html_content)
+            summary_html = doc.summary()
+
+            # Parse the summary HTML to extract text content
+            from bs4 import BeautifulSoup
+            soup = BeautifulSoup(summary_html, "html.parser")
+            return soup.get_text(separator='\n', strip=True)
+
+        except (ImportError, Exception) as e:
+            # Fallback: use BeautifulSoup to extract text content
             from bs4 import BeautifulSoup
 
             soup = BeautifulSoup(response.content, "html.parser")
             # Remove script and style elements
-            for script in soup(["script", "style"]):
+            for script in soup(["script", "style", "nav", "footer", "header"]):
                 script.decompose()
-            return soup.get_text()
+            text = soup.get_text(separator='\n', strip=True)
+            # Clean up whitespace
+            lines = [line.strip() for line in text.splitlines() if line.strip()]
+            return '\n'.join(lines)
 
     except Exception as e:
         raise RuntimeError(f"Failed to scrape article from {url}: {e}")
