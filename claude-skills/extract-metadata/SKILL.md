@@ -12,6 +12,19 @@
 - 📊 **自动分类**（技术类/新闻类）
 - ⚡ **缓存机制**，避免重复 API 调用（7 天 TTL）
 
+## 目录结构（官方布局）
+
+```
+extract-metadata/
+├── SKILL.md          # 本说明与元数据
+├── main.py           # 入口启动器（调用 scripts/main.py）
+├── requirements.txt
+├── scripts/          # 可执行代码
+│   └── main.py
+├── references/       # 可选：文档与参考
+└── assets/           # 可选：模板与资源
+```
+
 ## 使用方法
 
 ### 基本用法

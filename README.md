@@ -4,7 +4,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md)
 
-AutoPaper is a CLI tool that automatically generates curated weekly newspapers from article URLs. It uses Claude AI to extract metadata, compose editorial content, and export to multiple formats.
+AutoPaper is a CLI tool that automatically generates curated weekly newspapers from article URLs. 中文用户可参阅 **[团队使用指南](TEAM_GUIDE.md)** 快速上手。 It uses Claude AI to extract metadata, compose editorial content, and export to multiple formats.
 
 ## ✨ Features
 
@@ -136,7 +136,7 @@ autopaper send-email 2026-W05-tech \
 | Command | Description |
 |---------|-------------|
 | `autopaper add <url>` | Add article from URL |
-| `autopaper list` | List all articles |
+| `autopaper list-articles` | List all articles |
 | `autopaper generate <type>` | Generate weekly issue (tech/news) |
 | `autopaper export-pdf <slug>` | Export issue to PDF |
 | `autopaper send-email <slug>` | Send issue via email |
@@ -148,6 +148,7 @@ See `autopaper --help` for all commands and options.
 ## 📚 Documentation
 
 - **[Quick Start Guide](docs/QUICKSTART.md)** - Detailed setup and usage
+- **[Team Guide (团队使用指南)](TEAM_GUIDE.md)** - 中文快速安装与使用
 - **[Email Feature Guide](docs/EMAIL_FEATURE.md)** - Email sending configuration and usage
 - **[Design Document](docs/AutoPaper-Design.md)** - Architecture and technical details
 - **[Contributing](CONTRIBUTING.md)** - Contribution guidelines
@@ -182,38 +183,55 @@ AutoPaper/
 │   ├── QUICKSTART.md
 │   ├── EMAIL_FEATURE.md
 │   └── AutoPaper-Design.md
+├── claude-skills/      # Standalone Claude Code Skills
+│   ├── shared/         # Shared config, cache, retry, JSON parser
+│   ├── generate-card/  # AI info card generator
+│   │   ├── SKILL.md
+│   │   ├── main.py     # Launcher
+│   │   ├── scripts/
+│   │   ├── references/
+│   │   └── assets/
+│   └── extract-metadata/ # Article metadata extractor
+│       ├── SKILL.md
+│       ├── main.py
+│       ├── scripts/
+│       ├── references/
+│       └── assets/
+├── TEAM_GUIDE.md       # 团队使用指南（中文）
 └── issues/             # Generated issues
 ```
 
 ## 🧩 Standalone Claude Code Skills
 
-AutoPaper's core AI capabilities are also available as **standalone Claude Code Skills** that can be used independently:
+AutoPaper's core AI capabilities are also available as **standalone Claude Code Skills** that can be used independently. Each skill follows the official layout: `SKILL.md`, `scripts/`, `references/`, `assets/`.
 
 ### Available Skills
 
-1. **📝 Article Metadata Extractor**
+1. **📝 Article Metadata Extractor** (`extract-metadata/`)
    - Extract structured metadata from article URLs or content
    - Auto-generate summaries, tags, and key points
    - Classify articles (technical vs news)
 
-2. **🎨 AI Info Card Generator**
+2. **🎨 AI Info Card Generator** (`generate-card/`)
    - Generate beautiful SVG infographic cards (1200x675)
    - Modern AI tech style with Chinese font support
    - Perfect for blog covers, social media, presentations
 
 ### Quick Start
 
+Run from the **skill root** (no `PYTHONPATH` needed):
+
 ```bash
 cd claude-skills
 
 # Extract article metadata
-PYTHONPATH=. python3 extract-metadata/main.py https://blog.example.com/article
+python extract-metadata/main.py https://blog.example.com/article
 
 # Generate info card
-PYTHONPATH=. python3 generate-card/main.py "本周技术精选" --content article.md
+python generate-card/main.py "本周技术精选" --content article.md
 ```
 
-**[→ Skills Quick Start](claude-skills/QUICKSTART.md)**
+Each skill's `main.py` is a launcher that runs `scripts/main.py`. See [generate-card/SKILL.md](claude-skills/generate-card/SKILL.md) and [extract-metadata/SKILL.md](claude-skills/extract-metadata/SKILL.md) for full usage and options.
 
 ## 🔧 Configuration
 
