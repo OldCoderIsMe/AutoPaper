@@ -7,6 +7,7 @@ from rich.console import Console
 
 from autopaper.commands import add, card, generate, export, sync, cover, send_email as email
 import autopaper.commands.list as list_cmd
+from autopaper.commands import delete
 from autopaper.config import config
 
 app = typer.Typer(
@@ -45,6 +46,7 @@ def main(
 # Register commands
 app.command()(add.add)
 app.command()(list_cmd.list_articles)
+app.command()(delete.delete)
 app.command()(generate.generate)
 app.command()(export.export_pdf)
 app.command()(sync.sync)
