@@ -127,7 +127,9 @@ class Config:
         Returns:
             Path to SQLite database
         """
-        return self.get("database_path", "data/db.sqlite")
+        path = self.get("database_path", "data/db.sqlite")
+        # Expand ~ to home directory
+        return os.path.expanduser(path)
 
     def get_obsidian_vault_path(self) -> str:
         """Get Obsidian vault path.

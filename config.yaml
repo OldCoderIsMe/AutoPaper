@@ -1,5 +1,5 @@
 # Database
-database_path: data/db.sqlite
+database_path: ~/data/db.sqlite
 
 # Obsidian Configuration
 obsidian:
