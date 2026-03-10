@@ -20,13 +20,14 @@ cache = CacheService(cache_dir="cache/ai_metadata")
 logger = get_logger(__name__)
 
 
-def extract_article_metadata(url: str, content: str, pre_extracted_title: str = "") -> Dict[str, Any]:
+def extract_article_metadata(url: str, content: str, pre_extracted_title: str = "", force: bool = False) -> Dict[str, Any]:
     """Extract metadata from article content using Claude.
 
     Args:
         url: Article URL
         content: Article content (HTML or plain text)
         pre_extracted_title: Pre-extracted title from scraper (for better accuracy)
+        force: Force re-extraction even if cached metadata exists
 
     Returns:
         Dictionary with extracted metadata:
@@ -41,12 +42,12 @@ def extract_article_metadata(url: str, content: str, pre_extracted_title: str = 
             "key_points": List[str]
         }
     """
-    # Check cache first
+    # Check cache first (skip if force=True)
     # Use content hash for cache key to avoid redundant API calls
     content_hash = hashlib.md5(content[:10000].encode()).hexdigest()
     cache_key = generate_cache_key("extract_metadata", url, content_hash)
 
-    if cached := cache.get(cache_key):
+    if not force and (cached := cache.get(cache_key)):
         print(f"[CACHE HIT] Using cached metadata for {url}", file=sys.stderr)
         return cached
 

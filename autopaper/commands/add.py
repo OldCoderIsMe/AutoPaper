@@ -105,7 +105,7 @@ def add(
     scraper = ArticleScraper(
         raw_dir=config.get_articles_raw_dir(), parsed_dir=config.get_articles_parsed_dir()
     )
-    scraped = scraper.scrape(url)
+    scraped = scraper.scrape(url, force=force)
 
     if not scraped:
         console.print(f"[red]Failed to scrape article from {url}[/red]")
@@ -116,7 +116,7 @@ def add(
     try:
         # Extract metadata using Claude skill, passing pre-extracted title for better accuracy
         metadata = extract_article_metadata.extract_article_metadata(
-            url, scraped["content"], pre_extracted_title=scraped["title"]
+            url, scraped["content"], pre_extracted_title=scraped["title"], force=force
         )
         logger.info(f"Successfully extracted metadata for {url}")
     except Exception as e:
@@ -147,8 +147,18 @@ def add(
         parsed_dir=config.get_articles_parsed_dir(),
     )
 
-    # Fetch HTML for image extraction
-    html = scraper_with_images.fetch_article(url)
+    # Fetch HTML for image extraction (skip cache if force)
+    if force:
+        html = scraper_with_images.fetch_article(url)
+    else:
+        # Try to load from raw cache first
+        raw_file = scraper_with_images.raw_dir / scraper_with_images._url_to_filename(url, "html")
+        if raw_file.exists():
+            with open(raw_file, "r", encoding="utf-8") as f:
+                html = f.read()
+        else:
+            html = scraper_with_images.fetch_article(url)
+
     cover_image_url = None
     cover_image_local = None
 

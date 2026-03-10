@@ -204,22 +204,24 @@ class ArticleScraper:
         return None
 
     @profile(log_slow_calls=5.0)
-    def scrape(self, url: str) -> Optional[Dict[str, str]]:
+    def scrape(self, url: str, force: bool = False) -> Optional[Dict[str, str]]:
         """Scrape and extract content from URL.
 
         Args:
             url: Article URL
+            force: Force re-scrape even if cached content exists
 
         Returns:
             Dictionary with url, title, content, short_excerpt, scraped_at
         """
         console.print(f"[cyan]Fetching article from {url}...[/cyan]")
 
-        # Check if already parsed
-        cached = self.load_parsed(url)
-        if cached:
-            console.print(f"[green]Using cached content for {url}[/green]")
-            return cached
+        # Check if already parsed (skip if force=True)
+        if not force:
+            cached = self.load_parsed(url)
+            if cached:
+                console.print(f"[green]Using cached content for {url}[/green]")
+                return cached
 
         # Fetch HTML
         html = self.fetch_article(url)
