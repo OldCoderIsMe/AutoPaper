@@ -81,7 +81,10 @@ autopaper add https://news.example.com/tech-trend-2026
 # 2. View all articles
 autopaper list-articles
 
-# 3. Generate weekly issue
+# 3. Delete an article by ID
+autopaper delete 5
+
+# 4. Generate weekly issue
 autopaper generate tech
 
 # 4. Export to PDF (includes AI card)
@@ -137,6 +140,7 @@ autopaper send-email 2026-W05-tech \
 |---------|-------------|
 | `autopaper add <url>` | Add article from URL |
 | `autopaper list-articles` | List all articles |
+| `autopaper delete <id>` | Delete article by ID |
 | `autopaper generate <type>` | Generate weekly issue (tech/news) |
 | `autopaper export-pdf <slug>` | Export issue to PDF |
 | `autopaper send-email <slug>` | Send issue via email |

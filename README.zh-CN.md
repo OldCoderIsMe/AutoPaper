@@ -100,7 +100,10 @@ autopaper add https://news.example.com/tech-trend-2026
 # 2. 查看所有文章
 autopaper list-articles
 
-# 3. 生成周报
+# 3. 根据 ID 删除文章
+autopaper delete 5
+
+# 4. 生成周报
 autopaper generate tech
 
 # 4. 导出为 PDF（包含 AI 卡片）
@@ -155,7 +158,8 @@ autopaper send-email 2026-W05-tech \
 | 命令 | 描述 |
 |---------|-------------|
 | `autopaper add <url>` | 从 URL 添加文章 |
-| `autopaper list` | 列出所有文章 |
+| `autopaper list-articles` | 列出所有文章 |
+| `autopaper delete <id>` | 根据 ID 删除文章 |
 | `autopaper generate <type>` | 生成周刊（tech/news） |
 | `autopaper export-pdf <slug>` | 导出期刊为 PDF |
 | `autopaper send-email <slug>` | 通过邮件发送期刊 |
