@@ -13,6 +13,7 @@ from rich.console import Console
 from autopaper.utils.logging import get_logger
 from autopaper.utils.retry import retry
 from autopaper.utils.profiling import profile
+from autopaper.utils.web_fetcher import fetch_article_content
 
 console = Console()
 logger = get_logger(__name__)
@@ -36,42 +37,55 @@ class ArticleScraper:
         self.parsed_dir.mkdir(parents=True, exist_ok=True)
         self.images_dir.mkdir(parents=True, exist_ok=True)
 
-    @retry(max_attempts=3, backoff_factor=2.0, exceptions=(requests.RequestException,))
-    def fetch_article(self, url: str, timeout: int = 30) -> Optional[str]:
+    @retry(max_attempts=3, backoff_factor=2.0, exceptions=(requests.RequestException, RuntimeError))
+    def fetch_article(self, url: str, timeout: int = 60) -> Optional[str]:
         """Fetch article HTML from URL.
+
+        Uses the enhanced web fetcher that is more resistant to anti-crawling measures.
+        Handles special cases like WeChat articles that have anti-scraping protections.
 
         Args:
             url: Article URL
-            timeout: Request timeout in seconds
+            timeout: Request timeout in seconds (increased default for JS-heavy sites)
 
         Returns:
             HTML content or None if failed
         """
-        headers = {
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
-        }
-        response = requests.get(url, headers=headers, timeout=timeout)
-        response.raise_for_status()
-        logger.debug(f"Successfully fetched {url} ({len(response.text)} bytes)")
-        return response.text
+        try:
+            content = fetch_article_content(url, timeout=timeout, return_html=True)
+            logger.debug(f"Successfully fetched {url} ({len(content)} bytes)")
+            return content
+        except Exception as e:
+            logger.error(f"Failed to fetch article {url}: {e}")
+            return None
 
-    def extract_content(self, html: str) -> Dict[str, str]:
+    def extract_content(self, html: str, url: str = "") -> Dict[str, str]:
         """Extract main content from HTML using readability-lxml.
+
+        For WeChat articles, uses a specialized extraction method since
+        readability doesn't handle WeChat's structure well.
 
         Args:
             html: HTML content
+            url: Article URL (for detecting WeChat articles)
 
         Returns:
             Dictionary with title, content, and short_excerpt
         """
         try:
+            from bs4 import BeautifulSoup
+            import re
+
+            # Special handling for WeChat articles
+            if "mp.weixin.qq.com" in url or "weixin.qq.com" in url:
+                return self._extract_wechat_content(html, BeautifulSoup)
+
+            # Default: use readability for other sites
             doc = Document(html)
             title = doc.title()
             content = doc.summary()
 
             # Get a short excerpt from the content
-            import re
-
             text_only = re.sub(r"<[^>]+>", " ", content)
             words = text_only.split()
             short_excerpt = " ".join(words[:50]) + "..." if len(words) > 50 else text_only
@@ -82,6 +96,59 @@ class ArticleScraper:
             logger.error(f"Error extracting content from HTML: {e}", exc_info=True)
             console.print(f"[red]Error extracting content: {e}[/red]")
             return {"title": "", "content": "", "short_excerpt": ""}
+
+    def _extract_wechat_content(self, html: str, BeautifulSoup) -> Dict[str, str]:
+        """Extract content from WeChat articles.
+
+        WeChat articles have their content in a div with id 'js_content'.
+        This method extracts that content directly.
+
+        Args:
+            html: HTML content
+            BeautifulSoup: BeautifulSoup class
+
+        Returns:
+            Dictionary with title, content, and short_excerpt
+        """
+        soup = BeautifulSoup(html, 'html.parser')
+
+        # Extract title from meta tag or page
+        title = ""
+        title_meta = soup.find('meta', property='og:title')
+        if title_meta:
+            title = title_meta.get('content', '')
+        if not title:
+            title_tag = soup.find('title')
+            if title_tag:
+                title = title_tag.get_text()
+
+        # Find the main content div
+        content_div = soup.find('div', id='js_content')
+        if content_div:
+            # Convert the content div to HTML string
+            content = str(content_div)
+
+            # Get a short excerpt from the content
+            import re
+            text_only = content_div.get_text(separator=' ', strip=True)
+            words = text_only.split()
+            short_excerpt = " ".join(words[:50]) + "..." if len(words) > 50 else text_only
+
+            logger.debug(f"Extracted WeChat content: title='{title[:50]}...', excerpt length={len(short_excerpt)}")
+            return {"title": title, "content": content, "short_excerpt": short_excerpt}
+
+        # Fallback to readability if WeChat structure not found
+        logger.warning("Could not find js_content div in WeChat article, falling back to readability")
+        from readability import Document
+        doc = Document(html)
+        title = doc.title()
+        content = doc.summary()
+
+        text_only = re.sub(r"<[^>]+>", " ", content)
+        words = text_only.split()
+        short_excerpt = " ".join(words[:50]) + "..." if len(words) > 50 else text_only
+
+        return {"title": title or "", "content": content or "", "short_excerpt": short_excerpt or ""}
 
     def save_raw(self, url: str, html: str) -> Path:
         """Save raw HTML to file.
@@ -163,7 +230,7 @@ class ArticleScraper:
         self.save_raw(url, html)
 
         # Extract content
-        extracted = self.extract_content(html)
+        extracted = self.extract_content(html, url)
 
         result = {
             "url": url,

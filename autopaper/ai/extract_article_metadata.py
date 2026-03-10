@@ -20,12 +20,13 @@ cache = CacheService(cache_dir="cache/ai_metadata")
 logger = get_logger(__name__)
 
 
-def extract_article_metadata(url: str, content: str) -> Dict[str, Any]:
+def extract_article_metadata(url: str, content: str, pre_extracted_title: str = "") -> Dict[str, Any]:
     """Extract metadata from article content using Claude.
 
     Args:
         url: Article URL
         content: Article content (HTML or plain text)
+        pre_extracted_title: Pre-extracted title from scraper (for better accuracy)
 
     Returns:
         Dictionary with extracted metadata:
@@ -65,12 +66,17 @@ def extract_article_metadata(url: str, content: str) -> Dict[str, Any]:
 
     client = Anthropic(**client_kwargs)
 
+    # Determine content length - use more for WeChat articles as they have verbose HTML
+    content_length = 20000 if "mp.weixin.qq.com" in url or "weixin.qq.com" in url else 8000
+
+    # Build prompt with pre-extracted title if available
+    title_context = f"\nPre-extracted Title: {pre_extracted_title}\n" if pre_extracted_title else ""
+
     prompt = f"""You are an article metadata extractor. Analyze the following article and extract metadata.
 
-Article URL: {url}
-
+Article URL: {url}{title_context}
 Article Content:
-{content[:8000]}
+{content[:content_length]}
 
 Please extract the following information and respond ONLY with valid JSON in this format:
 {{

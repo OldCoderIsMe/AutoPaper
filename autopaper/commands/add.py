@@ -17,6 +17,7 @@ from autopaper.scrapers.article import ArticleScraper
 from autopaper.utils.slug import generate_unique_slug
 from autopaper.utils.logging import get_logger
 from autopaper.utils.profiling import profile, print_profiler_summary
+from autopaper.utils.extract_date import extract_date_from_html
 
 console = Console()
 logger = get_logger(__name__)
@@ -49,10 +50,18 @@ def download_image(url: str, output_dir: Path, slug: str, force: bool = False) -
             console.print(f"  [dim]✓ Using cached image: {safe_filename}[/dim]")
             return safe_filename
 
-        # Download image
+        # Download image with enhanced headers for anti-crawling
         console.print(f"  [dim]⬇ Downloading image: {safe_filename}[/dim]")
         response = requests.get(url, timeout=15, headers={
-            "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36"
+            "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+            "Accept": "image/webp,image/apng,image/*,*/*;q=0.8",
+            "Accept-Language": "en-US,en;q=0.9",
+            "Accept-Encoding": "gzip, deflate, br",
+            "Connection": "keep-alive",
+            "Referer": "https://www.google.com/",
+            "Sec-Fetch-Dest": "image",
+            "Sec-Fetch-Mode": "no-cors",
+            "Sec-Fetch-Site": "cross-site",
         })
         response.raise_for_status()
 
@@ -105,8 +114,10 @@ def add(
     console.print("[cyan]Extracting metadata using Claude...[/cyan]")
 
     try:
-        # Extract metadata using Claude skill
-        metadata = extract_article_metadata.extract_article_metadata(url, scraped["content"])
+        # Extract metadata using Claude skill, passing pre-extracted title for better accuracy
+        metadata = extract_article_metadata.extract_article_metadata(
+            url, scraped["content"], pre_extracted_title=scraped["title"]
+        )
         logger.info(f"Successfully extracted metadata for {url}")
     except Exception as e:
         logger.warning(f"Failed to extract metadata from AI: {e}", exc_info=True)
