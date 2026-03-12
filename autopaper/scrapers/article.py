@@ -1,6 +1,7 @@
 """Article scraping and content extraction."""
 import json
 import os
+import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -17,6 +18,70 @@ from autopaper.utils.web_fetcher import fetch_article_content
 
 console = Console()
 logger = get_logger(__name__)
+
+
+def extract_wechat_metadata(html: str, url: str = "") -> Dict[str, Optional[str]]:
+    """Extract WeChat article metadata (author, source, publish_date).
+
+    Args:
+        html: HTML content
+        url: Article URL (for verification)
+
+    Returns:
+        Dictionary with author, source, and publish_date
+    """
+    from bs4 import BeautifulSoup
+
+    soup = BeautifulSoup(html, 'html.parser')
+    metadata = {
+        "author": None,
+        "source": None,
+        "publish_date": None
+    }
+
+    # Extract author
+    # Method 1: meta name="author"
+    author_meta = soup.find('meta', {'name': 'author'}) or soup.find('meta', {'property': 'og:article:author'})
+    if author_meta:
+        metadata["author"] = author_meta.get('content', '').strip()
+
+    # Method 2: Look for author in script tags (WeChat format)
+    if not metadata["author"]:
+        scripts = soup.find_all('script')
+        for script in scripts:
+            if script.string:
+                # Look for author in WeChat script data
+                author_match = re.search(r'"author"\s*:\s*"([^"]+)"', script.string)
+                if author_match:
+                    metadata["author"] = author_match.group(1).strip()
+                    break
+
+    # Extract source (公众号名称)
+    # Method 1: meta property="og:article:author" often contains the account name
+    source_meta = soup.find('meta', {'property': 'og:article:author'})
+    if source_meta:
+        metadata["source"] = source_meta.get('content', '').strip()
+
+    # Method 2: Try nickname field in script
+    if not metadata["source"]:
+        scripts = soup.find_all('script')
+        for script in scripts:
+            if script.string:
+                nickname_match = re.search(r'"nickname"\s*:\s*"([^"]+)"', script.string)
+                if nickname_match:
+                    metadata["source"] = nickname_match.group(1).strip()
+                    break
+
+    # Method 3: Fallback to domain name
+    if not metadata["source"]:
+        parsed = urlparse(url)
+        metadata["source"] = parsed.netloc.replace("mp.weixin.qq.com", "微信公众号").strip()
+
+    # Extract publish date
+    from autopaper.utils.extract_date import extract_date_from_html
+    metadata["publish_date"] = extract_date_from_html(html, url)
+
+    return metadata
 
 
 class ArticleScraper:

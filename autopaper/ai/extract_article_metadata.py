@@ -2,6 +2,7 @@
 import hashlib
 import os
 import sys
+from datetime import datetime
 from typing import Any, Dict
 
 from anthropic import Anthropic
@@ -51,6 +52,22 @@ def extract_article_metadata(url: str, content: str, pre_extracted_title: str = 
         print(f"[CACHE HIT] Using cached metadata for {url}", file=sys.stderr)
         return cached
 
+    # For WeChat articles, pre-extract metadata for better accuracy
+    wechat_metadata = {}
+    is_wechat = "mp.weixin.qq.com" in url or "weixin.qq.com" in url
+    if is_wechat:
+        try:
+            from autopaper.scrapers.article import extract_wechat_metadata
+            wechat_metadata = extract_wechat_metadata(content, url)
+            if wechat_metadata.get("author"):
+                print(f"[WECHAT] Extracted author: {wechat_metadata['author']}", file=sys.stderr)
+            if wechat_metadata.get("source"):
+                print(f"[WECHAT] Extracted source: {wechat_metadata['source']}", file=sys.stderr)
+            if wechat_metadata.get("publish_date"):
+                print(f"[WECHAT] Extracted publish date: {wechat_metadata['publish_date']}", file=sys.stderr)
+        except Exception as e:
+            logger.warning(f"Failed to extract WeChat metadata: {e}")
+
     # Get API key from config (supports both ANTHROPIC_API_KEY and ANTHROPIC_AUTH_TOKEN)
     api_key = config.get_anthropic_api_key()
     if not api_key:
@@ -68,14 +85,23 @@ def extract_article_metadata(url: str, content: str, pre_extracted_title: str = 
     client = Anthropic(**client_kwargs)
 
     # Determine content length - use more for WeChat articles as they have verbose HTML
-    content_length = 20000 if "mp.weixin.qq.com" in url or "weixin.qq.com" in url else 8000
+    content_length = 20000 if is_wechat else 8000
 
-    # Build prompt with pre-extracted title if available
+    # Build prompt with pre-extracted metadata if available
     title_context = f"\nPre-extracted Title: {pre_extracted_title}\n" if pre_extracted_title else ""
+    wechat_context = ""
+    if wechat_metadata:
+        wechat_context = "\nPre-extracted WeChat Metadata:\n"
+        if wechat_metadata.get("author"):
+            wechat_context += f"- Author: {wechat_metadata['author']}\n"
+        if wechat_metadata.get("source"):
+            wechat_context += f"- Source: {wechat_metadata['source']}\n"
+        if wechat_metadata.get("publish_date"):
+            wechat_context += f"- Publish Date: {wechat_metadata['publish_date']}\n"
 
     prompt = f"""You are an article metadata extractor. Analyze the following article and extract metadata.
 
-Article URL: {url}{title_context}
+Article URL: {url}{title_context}{wechat_context}
 Article Content:
 {content[:content_length]}
 
@@ -98,7 +124,10 @@ Article type classification:
 Tags should be relevant technical or topic keywords (e.g., kubernetes, llm, python, security).
 Extract 3-7 key points as bullet points.
 
-IMPORTANT: Respond with ONLY the JSON object, no additional text."""
+IMPORTANT:
+- If pre-extracted metadata is provided above, use it as the primary source for author, source, and publish_date
+- If no publish_date is available, use the current date: {datetime.now().strftime("%Y-%m-%d")}
+- Respond with ONLY the JSON object, no additional text."""
 
     # Create AI call with retry
     @retry(max_attempts=3, backoff_factor=2.0, exceptions=(APIError, APITimeoutError, ConnectionError))
@@ -124,6 +153,20 @@ IMPORTANT: Respond with ONLY the JSON object, no additional text."""
         # Ensure article_type is valid
         if metadata["article_type"] not in ["technical", "news"]:
             metadata["article_type"] = "news"
+
+        # Use pre-extracted WeChat metadata if AI didn't find it
+        if is_wechat and wechat_metadata:
+            if not metadata.get("author") or metadata["author"] == "Unknown":
+                metadata["author"] = wechat_metadata.get("author", "Unknown")
+            if not metadata.get("source"):
+                metadata["source"] = wechat_metadata.get("source", "")
+            if not metadata.get("publish_date"):
+                metadata["publish_date"] = wechat_metadata.get("publish_date", "")
+
+        # Ensure publish_date has a value (use current date if still empty)
+        if not metadata.get("publish_date") or metadata["publish_date"].strip() == "":
+            metadata["publish_date"] = datetime.now().strftime("%Y-%m-%d")
+            print(f"[INFO] Using current date as publish_date: {metadata['publish_date']}", file=sys.stderr)
 
         # Cache the result (7 days TTL)
         cache.set(cache_key, metadata, ttl=604800)
