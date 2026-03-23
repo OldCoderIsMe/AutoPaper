@@ -142,7 +142,8 @@ autopaper send-email 2026-W05-tech \
 | `autopaper list-articles` | List all articles |
 | `autopaper delete <id>` | Delete article by ID |
 | `autopaper generate <type>` | Generate weekly issue (tech/news) |
-| `autopaper export-pdf <slug>` | Export issue to PDF |
+| `autopaper export-pdf <slug>` | Export issue to PDF (also saves HTML) |
+| `autopaper export-pdf <slug> --html` | Generate HTML only, skip PDF (debug) |
 | `autopaper send-email <slug>` | Send issue via email |
 | `autopaper generate-card <slug>` | Generate AI summary card |
 | `autopaper sync obsidian <slug>` | Sync to Obsidian vault |
@@ -402,7 +403,7 @@ Built with:
 - [Claude](https://www.anthropic.com/claude) - AI capabilities
 - [Typer](https://typer.tiangolo.com/) - CLI framework
 - [Rich](https://rich.readthedocs.io/) - Terminal formatting
-- [WeasyPrint](https://weasyprint.org/) - PDF generation
+- [LibreOffice](https://www.libreoffice.org/) - PDF generation (replaces WeasyPrint for better CJK support)
 - [Jinja2](https://jinja.palletsprojects.com/) - Template engine
 - [aiosmtplib](https://github.com/cole/aiosmtplib) - Async SMTP client
 
