@@ -161,7 +161,8 @@ autopaper send-email 2026-W05-tech \
 | `autopaper list-articles` | 列出所有文章 |
 | `autopaper delete <id>` | 根据 ID 删除文章 |
 | `autopaper generate <type>` | 生成周刊（tech/news） |
-| `autopaper export-pdf <slug>` | 导出期刊为 PDF |
+| `autopaper export-pdf <slug>` | 导出期刊为 PDF（同时保存 HTML） |
+| `autopaper export-pdf <slug> --html` | 仅生成 HTML，跳过 PDF（调试用） |
 | `autopaper send-email <slug>` | 通过邮件发送期刊 |
 | `autopaper generate-card <slug>` | 生成 AI 摘要卡片 |
 | `autopaper sync obsidian <slug>` | 同步到 Obsidian 笔记库 |
@@ -373,7 +374,7 @@ MIT License - 详见 [LICENSE](LICENSE) 文件
 - [Claude](https://www.anthropic.com/claude) - AI 能力
 - [Typer](https://typer.tiangolo.com/) - CLI 框架
 - [Rich](https://rich.readthedocs.io/) - 终端格式化
-- [WeasyPrint](https://weasyprint.org/) - PDF 生成
+- [LibreOffice](https://www.libreoffice.org/) - PDF 生成（替代 WeasyPrint，更好地支持中文）
 - [Jinja2](https://jinja.palletsprojects.com/) - 模板引擎
 - [aiosmtplib](https://github.com/cole/aiosmtplib) - 异步 SMTP 客户端
 
