@@ -10,7 +10,6 @@ import typer
 from jinja2 import Template
 from PIL import Image
 from rich.console import Console
-from weasyprint import HTML, CSS
 
 from autopaper.config import config
 from autopaper.database import Database
@@ -22,6 +21,7 @@ def export_pdf(
     issue_slug: str = typer.Argument(..., help="Issue slug (e.g., 2026-W04-tech)"),
     output: str = typer.Option(None, "--output", "-o", help="Output PDF path"),
     no_card: bool = typer.Option(False, "--no-card", help="Skip InfoQ card generation (faster)"),
+    html_only: bool = typer.Option(False, "--html", help="Only generate HTML, skip PDF (for debugging)"),
 ):
     """Export an issue to PDF.
 
@@ -153,37 +153,53 @@ def export_pdf(
         **sections,
     )
 
+    # Always save HTML for debugging / preview
+    html_output_path = issues_dir / f"{issue_slug}.html"
+    with open(html_output_path, "w", encoding="utf-8") as f:
+        f.write(html_content)
+    console.print(f"[green]✓[/green] HTML saved: {html_output_path}")
+
+    if html_only:
+        console.print("[dim]--html flag set, skipping PDF generation[/dim]")
+        return
+
     # Generate PDF
     if output is None:
         output_path = issues_dir / f"{issue_slug}.pdf"
     else:
         output_path = Path(output)
 
-    console.print("[cyan]Generating PDF...[/cyan]")
+    console.print("[cyan]Generating PDF via LibreOffice...[/cyan]")
 
     try:
-        # Get PDF config
-        pdf_config = config.get_pdf_config()
-
-        # Create HTML document with base URL for relative image paths
-        # Use issues_dir as base URL because both infocard and images are in issues_dir
+        import subprocess
         pdf_start = time.time()
-        html_doc = HTML(string=html_content, base_url=str(issues_dir))
 
-        # CSS for PDF
-        css_styles = f"""
-        @page {{
-            size: {pdf_config.get('page_size', 'A4')};
-            margin: {pdf_config.get('margin_top', '20mm')} {pdf_config.get('margin_right', '15mm')} {pdf_config.get('margin_bottom', '20mm')} {pdf_config.get('margin_left', '15mm')};
-        }}
-        """
+        soffice = "/Applications/LibreOffice.app/Contents/MacOS/soffice"
+        result = subprocess.run(
+            [
+                soffice, "--headless",
+                "--convert-to", "pdf",
+                str(html_output_path),
+                "--outdir", str(issues_dir),
+            ],
+            capture_output=True,
+            text=True,
+            timeout=120,
+        )
+        if result.returncode != 0:
+            raise RuntimeError(result.stderr or result.stdout)
 
-        css = CSS(string=css_styles)
+        # LibreOffice outputs <basename>.pdf in outdir
+        lo_output = issues_dir / f"{issue_slug}.pdf"
+        if output is not None and Path(output) != lo_output:
+            import shutil
+            shutil.move(str(lo_output), output)
+            output_path = Path(output)
+        else:
+            output_path = lo_output
 
-        # Write PDF
-        html_doc.write_pdf(str(output_path), stylesheets=[css])
         pdf_time = time.time() - pdf_start
-
         console.print(f"[green]✓[/green] PDF exported: {output_path}")
         console.print(f"[dim]PDF generated in {pdf_time:.2f}s[/dim]")
 
@@ -205,125 +221,80 @@ def _markdown_to_html(markdown_text: str) -> str:
     if not markdown_text:
         return ""
 
-    html = markdown_text
+    def _inline(text: str) -> str:
+        # Convert links first to avoid interfering with emphasis parsing.
+        text = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', text)
+        text = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', text)
+        text = re.sub(r'__(.*?)__', r'<strong>\1</strong>', text)
+        text = re.sub(r'(?<!\*)\*([^*]+)\*(?!\*)', r'<em>\1</em>', text)
+        text = re.sub(r'(?<!_)_([^_]+)_(?!_)', r'<em>\1</em>', text)
+        text = re.sub(r'`([^`]+)`', r'<code>\1</code>', text)
+        return text
 
-    # Convert headers first (### Title)
-    html = re.sub(r'^###\s+(.*?)$', r'<h4>\1</h4>', html, flags=re.MULTILINE)
-
-    # Convert bold text **text** or __text__ to <strong>text</strong>
-    html = re.sub(r'\*\*(.*?)\*\*', r'<strong>\1</strong>', html)
-    html = re.sub(r'__(.*?)__', r'<strong>\1</strong>', html)
-
-    # Convert italic text *text* or _text_ to <em>text</em>
-    html = re.sub(r'(?<!\*)\*([^*]+)\*(?!\*)', r'<em>\1</em>', html)
-    html = re.sub(r'(?<!_)_([^_]+)_(?!_)', r'<em>\1</em>', html)
-
-    # Convert code text `text` to <code>text</code>
-    html = re.sub(r'`([^`]+)`', r'<code>\1</code>', html)
-
-    # Convert links [text](url) to <a href="url">text</a>
-    html = re.sub(r'\[([^\]]+)\]\(([^)]+)\)', r'<a href="\2">\1</a>', html)
-
-    # Split into lines and process
-    lines = html.split('\n')
+    lines = markdown_text.split('\n')
     result = []
-    current_paragraph = []
-    in_numbered_list = False
+    paragraph_lines = []
     in_bullet_list = False
 
-    for line in lines:
-        line = line.strip()
+    def flush_paragraph() -> None:
+        nonlocal paragraph_lines
+        if paragraph_lines:
+            result.append(f'<p>{_inline(" ".join(paragraph_lines))}</p>')
+            paragraph_lines = []
+
+    def close_bullets() -> None:
+        nonlocal in_bullet_list
+        if in_bullet_list:
+            result.append('</ul>')
+            in_bullet_list = False
+
+    for raw in lines:
+        line = raw.strip()
 
         if not line:
-            # Empty line - end current paragraph/list
-            if current_paragraph:
-                para_text = ' '.join(current_paragraph)
-                # For long paragraphs, split into sentences
-                if len(para_text) > 100:
-                    # Split by punctuation for better readability
-                    sentences = re.split(r'([。！？；，])', para_text)
-                    para_with_breaks = []
-                    for i, sent in enumerate(sentences):
-                        if sent:
-                            para_with_breaks.append(sent)
-                            if i < len(sentences) - 1 and sent[-1] in '。！？；，':
-                                para_with_breaks.append('<br/>')
-                    result.append(f'<p>{"".join(para_with_breaks)}</p>')
-                else:
-                    result.append(f'<p>{para_text}</p>')
-                current_paragraph = []
-            if in_bullet_list:
-                result.append('</ul>')
-                in_bullet_list = False
-            if in_numbered_list:
-                in_numbered_list = False
+            flush_paragraph()
+            close_bullets()
+            continue
 
-        elif line.startswith('<h4>'):
-            # Header - end current paragraph
-            if current_paragraph:
-                result.append(f'<p>{" ".join(current_paragraph)}</p>')
-                current_paragraph = []
-            result.append(line)
+        if line.startswith("### "):
+            flush_paragraph()
+            close_bullets()
+            result.append(f'<h4>{_inline(line[4:].strip())}</h4>')
+            continue
 
-        elif re.match(r'^(\d+)\.\s+\*\*.*?\*\*:', line):
-            # Numbered list with bold title like "1. **Title:** content"
-            if current_paragraph:
-                result.append(f'<p>{" ".join(current_paragraph)}</p>')
-                current_paragraph = []
+        trend_match = re.match(r'^(\d+)\.\s+\*\*(.*?)\*\*:\s*(.*)', line)
+        if trend_match:
+            flush_paragraph()
+            close_bullets()
+            number, title, content = trend_match.groups()
+            result.append('<div class="trend-item">')
+            result.append(f'<span class="trend-number">{number}.</span>')
+            result.append(f'<strong class="trend-title">{_inline(title)}:</strong> {_inline(content)}')
+            result.append('</div>')
+            continue
 
-            # Extract the title and content
-            match = re.match(r'^(\d+)\.\s+\*\*(.*?)\*\*:\s*(.*)', line)
-            if match:
-                number = match.group(1)
-                title = match.group(2)
-                content = match.group(3)
+        num_match = re.match(r'^(\d+)\.\s+(.*)', line)
+        if num_match:
+            flush_paragraph()
+            close_bullets()
+            number, content = num_match.groups()
+            result.append(f'<p class="numbered-paragraph"><strong>{number}.</strong> {_inline(content)}</p>')
+            continue
 
-                # Create styled list item
-                result.append(f'<div class="trend-item">')
-                result.append(f'<span class="trend-number">{number}.</span>')
-                result.append(f'<strong class="trend-title">{title}:</strong> {content}')
-                result.append(f'</div>')
-
-        elif re.match(r'^\d+\.\s+', line):
-            # Regular numbered list
-            if in_bullet_list:
-                result.append('</ul>')
-                in_bullet_list = False
-
-            content = re.sub(r'^\d+\.\s*', '', line)
-            result.append(f'<p class="numbered-paragraph"><strong>{line.split(".")[0]}.</strong> {content}</p>')
-
-        elif line.startswith(('-', '*', '+')):
-            # Bullet list item
+        if re.match(r'^[-*+]\s+', line):
+            flush_paragraph()
             if not in_bullet_list:
                 result.append('<ul>')
                 in_bullet_list = True
-            content = line[1:].strip()
-            result.append(f'<li>{content}</li>')
+            bullet_text = re.sub(r'^[-*+]\s+', '', line)
+            result.append(f'<li>{_inline(bullet_text)}</li>')
+            continue
 
-        else:
-            # Regular line - add to current paragraph
-            current_paragraph.append(line)
+        close_bullets()
+        paragraph_lines.append(line)
 
-    # Add last paragraph
-    if current_paragraph:
-        para_text = ' '.join(current_paragraph)
-        if len(para_text) > 100:
-            # Split long paragraphs
-            sentences = re.split(r'([。！？；，])', para_text)
-            para_with_breaks = []
-            for i, sent in enumerate(sentences):
-                if sent:
-                    para_with_breaks.append(sent)
-                    if i < len(sentences) - 1 and sent and sent[-1] in '。！？；，':
-                        para_with_breaks.append('<br/>')
-            result.append(f'<p>{"".join(para_with_breaks)}</p>')
-        else:
-            result.append(f'<p>{para_text}</p>')
-
-    # Close any open lists
-    if in_bullet_list:
-        result.append('</ul>')
+    flush_paragraph()
+    close_bullets()
 
     return '\n'.join(result)
 

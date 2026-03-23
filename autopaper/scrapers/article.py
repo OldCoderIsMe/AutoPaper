@@ -379,6 +379,10 @@ class ArticleScraper:
                 'placeholder',
                 '1x1',  # Placeholder images
                 'pixel',
+                # WeChat images block external hotlinking
+                'mmbiz.qpic.cn',
+                'mmbiz.qlogo.cn',
+                'wx.qlogo.cn',
             ]
 
             if any(pattern in url_lower for pattern in skip_patterns):

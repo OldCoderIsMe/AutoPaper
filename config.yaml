@@ -18,7 +18,7 @@ issues_dir: issues
 # API Configuration
 api:
   anthropic_api_key: ${ANTHROPIC_API_KEY}
-  model: claude-sonnet-4-20250514
+  model: glm-4.7
   max_tokens: 4096
 
 # Tag Normalization Rules

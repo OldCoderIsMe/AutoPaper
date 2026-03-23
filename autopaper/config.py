@@ -75,7 +75,8 @@ class Config:
             config_path: Path to configuration file. If None, uses get_default_config_path()
         """
         # Load environment variables from .env file
-        load_dotenv()
+        # override=True ensures .env values take precedence over shell env vars
+        load_dotenv(override=True)
 
         if config_path is None:
             config_path = get_default_config_path()

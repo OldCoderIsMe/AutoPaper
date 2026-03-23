@@ -167,14 +167,19 @@ def add(
         if cover_image_url:
             console.print(f"[green]✓[/green] Cover image URL found")
 
-            # Download image during add phase
-            images_dir = Path(config.get_articles_images_dir())
-            cover_image_local = download_image(
-                cover_image_url,
-                images_dir,
-                slug,
-                force=force
-            )
+            # Skip WeChat images — they block external hotlinking
+            wechat_hosts = ("mmbiz.qpic.cn", "mmbiz.qlogo.cn", "wx.qlogo.cn")
+            if any(h in cover_image_url for h in wechat_hosts):
+                console.print(f"  [dim]⚠ Skipping WeChat image (hotlink blocked)[/dim]")
+            else:
+                # Download image during add phase
+                images_dir = Path(config.get_articles_images_dir())
+                cover_image_local = download_image(
+                    cover_image_url,
+                    images_dir,
+                    slug,
+                    force=force
+                )
 
     # Create article object (store local path instead of remote URL)
     added_date = datetime.now()

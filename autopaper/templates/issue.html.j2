@@ -5,15 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ title }}</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;700&family=Noto+Sans+SC:wght@400;700&display=swap');
-
         body {
-            font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            /* 英文字体排在前面，确保 ASCII 字符用清晰的无衬线字体渲染；
+               中文字体紧随其后，保证 CJK 字符正确显示。
+               WeasyPrint 会按顺序找到能渲染该字符的第一个字体，
+               从而避免中英混排时因字体回退缺失导致字符错位/乱码。 */
+            font-family: "Arial", "Helvetica Neue", "Helvetica",
+                         "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+                         "Source Han Sans CN", "Noto Sans CJK SC",
+                         "WenQuanYi Micro Hei", sans-serif;
             line-height: 1.8;
             color: #333;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
+            /* 删除 max-width / margin:auto / padding：
+               WeasyPrint 以 @page margin 控制版心，
+               body 上的 max-width 会与页面宽度冲突，
+               导致内容溢出后字符断列错位。 */
             background: #fff;
         }
 
@@ -25,7 +31,8 @@
         }
 
         .header h1 {
-            font-family: 'Noto Serif SC', serif;
+            font-family: "Georgia", "Times New Roman",
+                         "Songti SC", "STSong", "Noto Serif CJK SC", serif;
             font-size: 2.5em;
             color: #1e293b;
             margin-bottom: 10px;
@@ -41,7 +48,8 @@
         }
 
         .section h2 {
-            font-family: 'Noto Serif SC', serif;
+            font-family: "Georgia", "Times New Roman",
+                         "Songti SC", "STSong", "Noto Serif CJK SC", serif;
             font-size: 1.8em;
             color: #2563eb;
             margin-bottom: 20px;
@@ -71,6 +79,8 @@
             border-left: 4px solid #2563eb;
             border-radius: 6px;
             line-height: 1.8;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .trend-number {
@@ -96,6 +106,8 @@
             margin-bottom: 20px;
             border-left: 4px solid #2563eb;
             border-radius: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .article-block p {
@@ -159,6 +171,8 @@
             padding: 12px 15px;
             margin-bottom: 10px;
             border-radius: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         .news-list li strong {
